@@ -8,103 +8,8 @@ import {
   TextInput,
   StatusBar,
 } from 'react-native';
+import { SITES, FILTERS } from '../../utils/data';
 
-// ── Dummy Data ─────────────────────────────────────────────
-const ALL_SITES = [
-  {
-    id: '1',
-    name: 'Cape Coast Castle',
-    region: 'Central Region',
-    category: 'Historical',
-    rating: 4.8,
-    reviews: 320,
-    color: '#1A4A6B',
-    verified: true,
-    description: 'A UNESCO World Heritage Site and one of the most important slave castles built along the Ghanaian coast.',
-  },
-  {
-    id: '2',
-    name: 'Kakum National Park',
-    region: 'Central Region',
-    category: 'Wildlife',
-    rating: 4.7,
-    reviews: 210,
-    color: '#2D6A4F',
-    verified: true,
-    description: 'Famous for its canopy walkway suspended 30 metres above the forest floor.',
-  },
-  {
-    id: '3',
-    name: 'Mole National Park',
-    region: 'Northern Region',
-    category: 'Wildlife',
-    rating: 4.6,
-    reviews: 180,
-    color: '#6B4A1A',
-    verified: true,
-    description: "Ghana's largest wildlife sanctuary, home to elephants, buffalo, and over 300 bird species.",
-  },
-  {
-    id: '4',
-    name: 'Elmina Castle',
-    region: 'Central Region',
-    category: 'Historical',
-    rating: 4.7,
-    reviews: 290,
-    color: '#6B1A1A',
-    verified: true,
-    description: 'The oldest European building in sub-Saharan Africa, built by the Portuguese in 1482.',
-  },
-  {
-    id: '5',
-    name: 'Labadi Beach',
-    region: 'Greater Accra',
-    category: 'Beach',
-    rating: 4.3,
-    reviews: 150,
-    color: '#C0873F',
-    verified: true,
-    description: 'The most popular beach in Accra, known for its lively atmosphere and weekend entertainment.',
-  },
-  {
-    id: '6',
-    name: 'Larabanga Mosque',
-    region: 'Northern Region',
-    category: 'Religious',
-    rating: 4.5,
-    reviews: 95,
-    color: '#4A1A6B',
-    verified: true,
-    description: 'One of the oldest mosques in West Africa, built in the Sudanese architectural style.',
-  },
-  {
-    id: '7',
-    name: 'Wli Waterfalls',
-    region: 'Volta Region',
-    category: 'Nature',
-    rating: 4.8,
-    reviews: 175,
-    color: '#1A6B5A',
-    verified: true,
-    description: 'The highest waterfall in West Africa, located near the border with Togo.',
-  },
-  {
-    id: '8',
-    name: 'Manhyia Palace',
-    region: 'Ashanti Region',
-    category: 'Cultural',
-    rating: 4.6,
-    reviews: 140,
-    color: '#8B6914',
-    verified: true,
-    description: 'The official residence of the Asantehene, the paramount chief of the Ashanti people.',
-  },
-];
-
-const FILTERS = [
-  'All', 'Historical', 'Wildlife',
-  'Beach', 'Cultural', 'Religious', 'Nature',
-];
 
 // ── Component ──────────────────────────────────────────────
 const SitesScreen = ({ navigation }) => {
@@ -112,7 +17,7 @@ const SitesScreen = ({ navigation }) => {
   const [activeFilter, setActiveFilter]   = useState('All');
 
   // Filter sites based on search and category
-  const filteredSites = ALL_SITES.filter((site) => {
+  const filteredSites = SITES.filter((site) => {
     const matchesSearch =
       site.name.toLowerCase().includes(searchText.toLowerCase()) ||
       site.region.toLowerCase().includes(searchText.toLowerCase());

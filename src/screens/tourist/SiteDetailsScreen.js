@@ -9,7 +9,7 @@ import {
   Linking,
 } from 'react-native';
 
-const SiteDetailScreen = ({ route, navigation }) => {
+const SiteDetailsScreen = ({ route, navigation }) => {
   const { site } = route.params;
   const [activeTab, setActiveTab] = useState('About');
   const [saved, setSaved] = useState(false);
@@ -922,4 +922,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SiteDetailScreen;
+export default SiteDetailsScreen;

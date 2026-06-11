@@ -9,9 +9,11 @@ import SignUpScreen from './src/screens/auth/SignUpScreen';
 import HomeScreen from './src/screens/tourist/HomeScreen';
 import SitesScreen from './src/screens/tourist/SitesScreen';
 import SiteDetailsScreen from './src/screens/tourist/SiteDetailsScreen';
-import UploadScreen from './src/screens/tourist/Upload.Screen';
+import UploadScreen from './src/screens/tourist/UploadScreen';
 import MapScreen from './src/screens/tourist/MapScreen';
 import ProfileScreen from './src/screens/tourist/ProfileScreen';
+import StaffDashboard from './src/screens/staff/StaffDashboard';
+import PhotoModerationScreen from './src/screens/staff/PhotoModerationScreen';
 
 
 const Stack = createNativeStackNavigator();
@@ -33,6 +35,8 @@ export default function App() {
         <Stack.Screen name="Upload" component={UploadScreen} />
         <Stack.Screen name="Map" component={MapScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
+        <Stack.Screen name="StaffDashboard" component={StaffDashboard} />
+        <Stack.Screen name="PhotoModeration" component={PhotoModerationScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

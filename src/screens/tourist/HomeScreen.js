@@ -10,59 +10,12 @@ import {
   StatusBar,
   FlatList,
 } from 'react-native';
+import {
+  CATEGORIES,
+  FEATURED_SITES,
+  RECENT_PHOTOS,
+} from '../../utils/data';
 
-// ── Dummy Data ─────────────────────────────────────────────
-// We replace this with real API data later
-const FEATURED_SITES = [
-  {
-    id: '1',
-    name: 'Cape Coast Castle',
-    region: 'Central Region',
-    category: 'Historical',
-    rating: 4.8,
-    color: '#1A4A6B',
-  },
-  {
-    id: '2',
-    name: 'Kakum National Park',
-    region: 'Central Region',
-    category: 'Wildlife',
-    rating: 4.7,
-    color: '#2D6A4F',
-  },
-  {
-    id: '3',
-    name: 'Mole National Park',
-    region: 'Northern Region',
-    category: 'Wildlife',
-    rating: 4.6,
-    color: '#6B4A1A',
-  },
-  {
-    id: '4',
-    name: 'Larabanga Mosque',
-    region: 'Northern Region',
-    category: 'Religious',
-    rating: 4.5,
-    color: '#4A1A6B',
-  },
-];
-
-const CATEGORIES = [
-  { id: '1', name: 'All',        icon: '🌍' },
-  { id: '2', name: 'Historical', icon: '🏛️' },
-  { id: '3', name: 'Wildlife',   icon: '🐘' },
-  { id: '4', name: 'Beach',      icon: '🏖️' },
-  { id: '5', name: 'Cultural',   icon: '🎭' },
-  { id: '6', name: 'Religious',  icon: '🕌' },
-];
-
-const RECENT_PHOTOS = [
-  { id: '1', site: 'Cape Coast Castle',    uploader: 'Kwame A.',  color: '#1A4A6B' },
-  { id: '2', site: 'Kakum National Park',  uploader: 'Ama S.',    color: '#2D6A4F' },
-  { id: '3', site: 'Labadi Beach',         uploader: 'Kofi M.',   color: '#C0873F' },
-  { id: '4', site: 'Elmina Castle',        uploader: 'Abena T.',  color: '#6B1A1A' },
-];
 
 // ── Component ──────────────────────────────────────────────
 const HomeScreen = ({ navigation }) => {
@@ -309,13 +262,13 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.navIcon}>🗺️</Text>
           <Text style={styles.navLabel}>Map</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}
+        <TouchableOpacity style={styles.navItem} 
+          onPress={() => navigation.navigate('Upload')}
         >
           <Text style={styles.navIcon}>📸</Text>
           <Text style={styles.navLabel}>Upload</Text>
         </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.navItem}
+        <TouchableOpacity style={styles.navItem}
           onPress={() => navigation.navigate('Profile')}
         >
           <Text style={styles.navIcon}>👤</Text>
