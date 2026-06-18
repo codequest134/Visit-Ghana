@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,49 @@ import {
   TouchableOpacity,
   StatusBar,
   Linking,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 
-const SiteDetailsScreen = ({ route, navigation }) => {
+// backend address
+const BASE_URL = 'http://192.168.100.4:8081/api';
+
+const SiteDetailScreen = ({ route, navigation }) => {
   const { site } = route.params;
   const [activeTab, setActiveTab] = useState('About');
   const [saved, setSaved] = useState(false);
+  const [photos, setPhotos] = useState([]);
+  const [photosLoading, setPhotosLoading] = useState(false);
 
   const TABS = ['About', 'History', 'Photos', 'Reviews'];
+
+  // Fetch real photos when the Photos tab is opened
+  useEffect(() => {
+    if (activeTab === 'Photos') {
+      loadPhotos();
+    }
+  }, [activeTab]);
+
+  const loadPhotos = async () => {
+    try {
+      setPhotosLoading(true);
+      const response = await fetch(
+        `${BASE_URL}/photos/${site.siteId}/approved`
+      );
+      const data = await response.json();
+      setPhotos(data);
+    } catch (err) {
+      console.error('Error loading photos:', err);
+    } finally {
+      setPhotosLoading(false);
+    }
+  };
+
+  const openDirections = () => {
+    const url =
+      `https://www.google.com/maps/dir/?api=1&destination=${site.latitude},${site.longitude}`;
+    Linking.openURL(url);
+  };
 
   // Dummy reviews
   const REVIEWS = [
@@ -46,20 +81,10 @@ const SiteDetailsScreen = ({ route, navigation }) => {
 
   // Dummy nearby places
   const NEARBY = [
-    { id: '1', name: 'Elmina Bay Hotel',   type: 'Hotel',      distance: '1.2 km' },
-    { id: '2', name: 'Baobab Restaurant',  type: 'Restaurant', distance: '0.8 km' },
-    { id: '3', name: 'Cape View Lodge',    type: 'Hotel',      distance: '2.1 km' },
-    { id: '4', name: 'The Fish Pot',       type: 'Restaurant', distance: '1.5 km' },
-  ];
-
-  // Dummy community photos
-  const PHOTOS = [
-    { id: '1', uploader: 'Kwame A.',  color: '#1A4A6B' },
-    { id: '2', uploader: 'Ama S.',    color: '#2D6A4F' },
-    { id: '3', uploader: 'Kofi M.',   color: '#6B4A1A' },
-    { id: '4', uploader: 'Abena T.',  color: '#4A1A6B' },
-    { id: '5', uploader: 'Yaw B.',    color: '#1A6B5A' },
-    { id: '6', uploader: 'Efua D.',   color: '#6B1A1A' },
+    { id: '1', name: 'Elmina Bay Hotel',  type: 'Hotel',      distance: '1.2 km' },
+    { id: '2', name: 'Baobab Restaurant', type: 'Restaurant', distance: '0.8 km' },
+    { id: '3', name: 'Cape View Lodge',   type: 'Hotel',      distance: '2.1 km' },
+    { id: '4', name: 'The Fish Pot',      type: 'Restaurant', distance: '1.5 km' },
   ];
 
   // ── Tab content renderer ──────────────────────
@@ -105,7 +130,10 @@ const SiteDetailsScreen = ({ route, navigation }) => {
             </View>
 
             {/* Virtual Tour Button */}
-            <TouchableOpacity style={styles.virtualTourButton}>
+            <TouchableOpacity
+              style={styles.virtualTourButton}
+              onPress={() => navigation.navigate('VirtualTour', { site })}
+            >
               <Text style={styles.virtualTourIcon}>🌐</Text>
               <View>
                 <Text style={styles.virtualTourTitle}>
@@ -173,18 +201,10 @@ const SiteDetailsScreen = ({ route, navigation }) => {
               The site was first established as a strategic location
               due to its geographical advantages. Over the decades it
               evolved into one of the most significant landmarks in
-              the region, drawing traders, diplomats, and eventually
-              tourists from across the globe.{'\n\n'}
+              the region.{'\n\n'}
               Today it stands as a symbol of Ghana's enduring spirit
               and its people's ability to preserve their heritage
-              through generations of change. The Ghana Tourism
-              Authority designated it as a protected heritage site,
-              ensuring its preservation for future generations.{'\n\n'}
-              Historians and archaeologists continue to study the
-              site today, regularly uncovering new insights into
-              daily life, trade patterns, and cultural practices of
-              the people who built and inhabited this remarkable
-              place.
+              through generations of change.
             </Text>
 
             {/* Timeline */}
@@ -208,7 +228,7 @@ const SiteDetailsScreen = ({ route, navigation }) => {
           </View>
         );
 
-      // ── Photos Tab ─────────────────────────────
+      // ── Photos Tab (REAL PHOTOS) ───────────────
       case 'Photos':
         return (
           <View>
@@ -226,44 +246,60 @@ const SiteDetailsScreen = ({ route, navigation }) => {
                 </Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.photosSubtitle}>
-              {PHOTOS.length} approved photos from visitors
-            </Text>
 
-            {/* Photos grid */}
-            <View style={styles.photosGrid}>
-              {PHOTOS.map((photo) => (
+            {photosLoading ? (
+              <ActivityIndicator
+                size="large"
+                color="#006B3F"
+                style={{ marginVertical: 40 }}
+              />
+            ) : photos.length === 0 ? (
+              <View style={styles.noPhotosContainer}>
+                <Text style={styles.noPhotosIcon}>📷</Text>
+                <Text style={styles.noPhotosTitle}>
+                  No photos yet
+                </Text>
+                <Text style={styles.noPhotosText}>
+                  Be the first to share a photo of this site
+                </Text>
                 <TouchableOpacity
-                  key={photo.id}
-                  style={[styles.photoTile,
-                    { backgroundColor: photo.color }]}
+                  style={styles.firstPhotoButton}
+                  onPress={() => navigation.navigate('Upload',
+                    { site: site })}
                 >
-                  <View style={styles.photoOverlay}>
-                    <Text style={styles.photoUploader}>
-                      📸 {photo.uploader}
-                    </Text>
-                  </View>
+                  <Text style={styles.firstPhotoText}>
+                    Add First Photo
+                  </Text>
                 </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Upload prompt */}
-            <TouchableOpacity
-              style={styles.uploadBanner}
-              onPress={() => navigation.navigate('Upload',
-                { site: site })}
-            >
-              <Text style={styles.uploadBannerIcon}>📷</Text>
-              <View>
-                <Text style={styles.uploadBannerTitle}>
-                  Been here? Share your photo
-                </Text>
-                <Text style={styles.uploadBannerSubtitle}>
-                  Help other tourists know what to expect
-                </Text>
               </View>
-              <Text style={styles.uploadBannerArrow}>›</Text>
-            </TouchableOpacity>
+            ) : (
+              <>
+                <Text style={styles.photosSubtitle}>
+                  {photos.length} photo{photos.length !== 1 ? 's' : ''} from visitors
+                </Text>
+                <View style={styles.realPhotosGrid}>
+                  {photos.map((photo) => (
+                    <View
+                      key={photo.photoId}
+                      style={styles.realPhotoTile}
+                    >
+                      <Image
+                        source={{ uri: photo.imageUrl }}
+                        style={styles.realPhotoImage}
+                      />
+                      {photo.caption ? (
+                        <Text
+                          style={styles.realPhotoCaption}
+                          numberOfLines={1}
+                        >
+                          {photo.caption}
+                        </Text>
+                      ) : null}
+                    </View>
+                  ))}
+                </View>
+              </>
+            )}
           </View>
         );
 
@@ -280,7 +316,7 @@ const SiteDetailsScreen = ({ route, navigation }) => {
                   {'☆'.repeat(5 - Math.round(site.rating))}
                 </Text>
                 <Text style={styles.ratingSubtext}>
-                  Based on {site.reviews} reviews
+                  Based on {site.reviewCount} reviews
                 </Text>
               </View>
             </View>
@@ -311,7 +347,6 @@ const SiteDetailsScreen = ({ route, navigation }) => {
               Visitor Reviews
             </Text>
 
-            {/* Individual reviews */}
             {REVIEWS.map((review) => (
               <View key={review.id} style={styles.reviewCard}>
                 <View style={styles.reviewHeader}>
@@ -351,11 +386,9 @@ const SiteDetailsScreen = ({ route, navigation }) => {
       <StatusBar barStyle="light-content" />
       <ScrollView showsVerticalScrollIndicator={false}>
 
-        {/* ── Hero Banner ── */}
+        {/* Hero Banner */}
         <View style={[styles.heroBanner,
           { backgroundColor: site.color }]}>
-
-          {/* Top buttons */}
           <View style={styles.heroButtons}>
             <TouchableOpacity
               style={styles.heroBtn}
@@ -373,7 +406,6 @@ const SiteDetailsScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Site info on banner */}
           <View style={styles.heroContent}>
             <View style={styles.heroBadgeRow}>
               <View style={styles.heroCategoryBadge}>
@@ -396,19 +428,25 @@ const SiteDetailsScreen = ({ route, navigation }) => {
                 ★ {site.rating}
               </Text>
               <Text style={styles.heroReviews}>
-                ({site.reviews} reviews)
+                ({site.reviewCount} reviews)
               </Text>
             </View>
           </View>
         </View>
 
-        {/* ── Action Buttons ── */}
+        {/* Action Buttons */}
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={openDirections}
+          >
             <Text style={styles.actionBtnIcon}>🗺️</Text>
             <Text style={styles.actionBtnText}>Directions</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => navigation.navigate('BuyTicket', { site })}
+          >
             <Text style={styles.actionBtnIcon}>🎟️</Text>
             <Text style={styles.actionBtnText}>Buy Ticket</Text>
           </TouchableOpacity>
@@ -422,7 +460,7 @@ const SiteDetailsScreen = ({ route, navigation }) => {
           </TouchableOpacity>
         </View>
 
-        {/* ── Tabs ── */}
+        {/* Tabs */}
         <View style={styles.tabsContainer}>
           {TABS.map((tab) => (
             <TouchableOpacity
@@ -439,7 +477,7 @@ const SiteDetailsScreen = ({ route, navigation }) => {
           ))}
         </View>
 
-        {/* ── Tab Content ── */}
+        {/* Tab Content */}
         <View style={styles.tabContent}>
           {renderTabContent()}
         </View>
@@ -450,14 +488,8 @@ const SiteDetailsScreen = ({ route, navigation }) => {
   );
 };
 
-// ── Styles ─────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
-
-  // ── Hero ─────────────────────────────────────
+  container: { flex: 1, backgroundColor: '#F5F5F5' },
   heroBanner: {
     height: 280,
     paddingTop: 50,
@@ -477,13 +509,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  heroBtnText: {
-    fontSize: 18,
-    color: '#ffffff',
-  },
-  heroContent: {
-    gap: 6,
-  },
+  heroBtnText: { fontSize: 18, color: '#ffffff' },
+  heroContent: { gap: 6 },
   heroBadgeRow: {
     flexDirection: 'row',
     gap: 8,
@@ -535,8 +562,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'rgba(255,255,255,0.75)',
   },
-
-  // ── Action Buttons ────────────────────────────
   actionButtons: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
@@ -546,20 +571,13 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
-  actionBtn: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  actionBtnIcon: {
-    fontSize: 22,
-  },
+  actionBtn: { alignItems: 'center', gap: 4 },
+  actionBtnIcon: { fontSize: 22 },
   actionBtnText: {
     fontSize: 11,
     color: '#555555',
     fontWeight: '500',
   },
-
-  // ── Tabs ─────────────────────────────────────
   tabsContainer: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
@@ -573,9 +591,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: 'transparent',
   },
-  tabActive: {
-    borderBottomColor: '#006B3F',
-  },
+  tabActive: { borderBottomColor: '#006B3F' },
   tabText: {
     fontSize: 13,
     color: '#888888',
@@ -585,8 +601,6 @@ const styles = StyleSheet.create({
     color: '#006B3F',
     fontWeight: '700',
   },
-
-  // ── Tab Content ───────────────────────────────
   tabContent: {
     padding: 20,
     backgroundColor: '#ffffff',
@@ -604,8 +618,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 20,
   },
-
-  // ── Info Grid ────────────────────────────────
   infoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -619,10 +631,7 @@ const styles = StyleSheet.create({
     padding: 14,
     alignItems: 'center',
   },
-  infoIcon: {
-    fontSize: 22,
-    marginBottom: 6,
-  },
+  infoIcon: { fontSize: 22, marginBottom: 6 },
   infoLabel: {
     fontSize: 11,
     color: '#888888',
@@ -634,8 +643,6 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     textAlign: 'center',
   },
-
-  // ── Virtual Tour & Audio ──────────────────────
   virtualTourButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -688,8 +695,6 @@ const styles = StyleSheet.create({
     color: '#FFA000',
     marginLeft: 'auto',
   },
-
-  // ── Nearby ───────────────────────────────────
   nearbyCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -714,17 +719,12 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     marginBottom: 2,
   },
-  nearbyType: {
-    fontSize: 12,
-    color: '#888888',
-  },
+  nearbyType: { fontSize: 12, color: '#888888' },
   nearbyDistance: {
     fontSize: 12,
     color: '#006B3F',
     fontWeight: '600',
   },
-
-  // ── Photos ───────────────────────────────────
   photosHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -747,56 +747,55 @@ const styles = StyleSheet.create({
     color: '#888888',
     marginBottom: 14,
   },
-  photosGrid: {
+  noPhotosContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  noPhotosIcon: { fontSize: 48, marginBottom: 12 },
+  noPhotosTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+    marginBottom: 6,
+  },
+  noPhotosText: {
+    fontSize: 13,
+    color: '#888888',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  firstPhotoButton: {
+    backgroundColor: '#006B3F',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 10,
+  },
+  firstPhotoText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  realPhotosGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginBottom: 16,
   },
-  photoTile: {
-    width: '31%',
-    height: 100,
+  realPhotoTile: {
+    width: '48%',
+    marginBottom: 8,
+  },
+  realPhotoImage: {
+    width: '100%',
+    height: 130,
     borderRadius: 10,
-    justifyContent: 'flex-end',
+    backgroundColor: '#F0F0F0',
   },
-  photoOverlay: {
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    borderBottomLeftRadius: 10,
-    borderBottomRightRadius: 10,
-    padding: 6,
-  },
-  photoUploader: {
-    color: '#ffffff',
-    fontSize: 10,
-  },
-  uploadBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0F9F4',
-    borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#006B3F',
-    borderStyle: 'dashed',
-    gap: 12,
-  },
-  uploadBannerIcon: { fontSize: 28 },
-  uploadBannerTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#006B3F',
-  },
-  uploadBannerSubtitle: {
+  realPhotoCaption: {
     fontSize: 12,
-    color: '#888888',
+    color: '#555555',
+    marginTop: 4,
+    paddingHorizontal: 2,
   },
-  uploadBannerArrow: {
-    fontSize: 22,
-    color: '#006B3F',
-    marginLeft: 'auto',
-  },
-
-  // ── Reviews ──────────────────────────────────
   ratingSummary: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -817,10 +816,7 @@ const styles = StyleSheet.create({
     color: '#FCD116',
     marginBottom: 4,
   },
-  ratingSubtext: {
-    fontSize: 12,
-    color: '#888888',
-  },
+  ratingSubtext: { fontSize: 12, color: '#888888' },
   ratingBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -881,21 +877,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1A1A1A',
   },
-  reviewDate: {
-    fontSize: 12,
-    color: '#888888',
-  },
-  reviewStars: {
-    fontSize: 14,
-    color: '#FCD116',
-  },
+  reviewDate: { fontSize: 12, color: '#888888' },
+  reviewStars: { fontSize: 14, color: '#FCD116' },
   reviewComment: {
     fontSize: 13,
     color: '#555555',
     lineHeight: 20,
   },
-
-  // ── Timeline ─────────────────────────────────
   timelineItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -916,10 +904,7 @@ const styles = StyleSheet.create({
     color: '#006B3F',
     marginBottom: 2,
   },
-  timelineEvent: {
-    fontSize: 13,
-    color: '#555555',
-  },
+  timelineEvent: { fontSize: 13, color: '#555555' },
 });
 
-export default SiteDetailsScreen;
+export default SiteDetailScreen;

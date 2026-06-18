@@ -5,271 +5,168 @@ import {
   StyleSheet,
   TouchableOpacity,
   StatusBar,
-  ScrollView,
   ActivityIndicator,
   Alert,
+  FlatList,
 } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { SITES } from '../../utils/data';
 
-const FILTERS = ['All', 'Historical', 'Wildlife', 'Beach', 'Cultural'];
+// ⬇️ Your backend address
+const BASE_URL = 'http://192.168.100.4:8081/api';
 
-// ── Component ──────────────────────────────────────────────
+const FILTERS = [
+  'All', 'Historical', 'Wildlife',
+  'Beach', 'Cultural', 'Religious', 'Nature',
+];
+
 const MapScreen = ({ navigation }) => {
+  const [sites, setSites]               = useState([]);
+  const [loading, setLoading]           = useState(true);
   const [location, setLocation]         = useState(null);
-  const [loadingLocation, setLoadingLocation] = useState(true);
   const [activeFilter, setActiveFilter] = useState('All');
-  const [activeTab, setActiveTab]       = useState('Sites');
   const [selectedSite, setSelectedSite] = useState(null);
 
-  // Get user location on mount
   useEffect(() => {
+    loadSites();
     getLocation();
   }, []);
 
-  const getLocation = async () => {
-    setLoadingLocation(true);
-
-    const { status } =
-      await Location.requestForegroundPermissionsAsync();
-
-    if (status !== 'granted') {
-      Alert.alert(
-        'Location Permission',
-        'Allow location access to see sites near you.',
-        [{ text: 'OK' }]
-      );
-      setLoadingLocation(false);
-      return;
+  const loadSites = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${BASE_URL}/sites`);
+      const data = await response.json();
+      setSites(data);
+    } catch (err) {
+      console.error('Error loading sites:', err);
+    } finally {
+      setLoading(false);
     }
-
-    const loc = await Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
-    });
-
-    setLocation(loc.coords);
-    setLoadingLocation(false);
   };
 
-  // Filter sites by category
-  const filteredSites = SITES.filter((site) =>
+  const getLocation = async () => {
+    try {
+      const { status } =
+        await Location.requestForegroundPermissionsAsync();
+      if (status === 'granted') {
+        const loc = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced,
+        });
+        setLocation(loc.coords);
+      }
+    } catch (err) {
+      console.log('Location error:', err);
+    }
+  };
+
+  const filteredSites = sites.filter((site) =>
     activeFilter === 'All' || site.category === activeFilter
   );
 
-  // ── Site List Item ───────────────────────────
-  const renderSiteItem = (site) => (
-    <TouchableOpacity
-      key={site.id}
-      style={[
-        styles.siteItem,
-        selectedSite?.id === site.id && styles.siteItemSelected,
-      ]}
-      onPress={() => setSelectedSite(site)}
-    >
-      <View style={[styles.siteColorDot,
-        { backgroundColor: site.color }]}
-      />
-      <View style={styles.siteItemInfo}>
-        <Text style={styles.siteItemName}>{site.name}</Text>
-        <Text style={styles.siteItemRegion}>
-          📍 {site.region}
-        </Text>
-        <View style={styles.siteItemBadgeRow}>
-          <View style={[styles.categoryBadge,
-            { backgroundColor: site.color + '22' }]}>
-            <Text style={[styles.categoryBadgeText,
-              { color: site.color }]}>
-              {site.category}
-            </Text>
-          </View>
-          <Text style={styles.distanceText}>
-            🚶 {site.distance}
-          </Text>
-        </View>
-      </View>
-      <TouchableOpacity
-        style={styles.directionsBtn}
-        onPress={() => navigation.navigate(
-          'SiteDetail', { site }
-        )}
-      >
-        <Text style={styles.directionsBtnText}>View</Text>
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
-
-  // ── Nearby Place Item ────────────────────────
-  const renderNearbyItem = (place) => (
-    <TouchableOpacity key={place.id} style={styles.nearbyItem}>
-      <View style={[styles.nearbyIconBox, {
-        backgroundColor:
-          place.type === 'Hotel' ? '#E8F5EE' : '#FFF3E0',
-      }]}>
-        <Text style={styles.nearbyItemIcon}>
-          {place.type === 'Hotel' ? '🏨' : '🍽️'}
-        </Text>
-      </View>
-      <View style={styles.nearbyItemInfo}>
-        <Text style={styles.nearbyItemName}>{place.name}</Text>
-        <View style={styles.nearbyItemRow}>
-          <Text style={styles.nearbyItemType}>{place.type}</Text>
-          <Text style={styles.nearbyItemDot}>·</Text>
-          <Text style={styles.nearbyItemRating}>
-            ★ {place.rating}
-          </Text>
-        </View>
-      </View>
-      <Text style={styles.nearbyItemDistance}>
-        {place.distance}
-      </Text>
-    </TouchableOpacity>
-  );
+  // Center the map on Ghana by default
+  const initialRegion = {
+    latitude: 7.9465,
+    longitude: -1.0232,
+    latitudeDelta: 5,
+    longitudeDelta: 5,
+  };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* ── Header ── */}
+      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>Map & Navigation</Text>
           <Text style={styles.headerSubtitle}>
-            {loadingLocation
-              ? 'Getting your location...'
-              : location
-              ? '📍 Location found'
-              : '📍 Location unavailable'}
+            {filteredSites.length} sites across Ghana
           </Text>
         </View>
-        <TouchableOpacity
-          style={styles.locationButton}
-          onPress={getLocation}
-        >
-          {loadingLocation ? (
-            <ActivityIndicator color="#ffffff" size="small" />
-          ) : (
-            <Text style={styles.locationButtonIcon}>🎯</Text>
-          )}
-        </TouchableOpacity>
       </View>
 
-      {/* ── Map Placeholder ── */}
-      <View style={styles.mapPlaceholder}>
-        {loadingLocation ? (
-          <View style={styles.mapLoading}>
-            <ActivityIndicator color="#006B3F" size="large" />
-            <Text style={styles.mapLoadingText}>
-              Getting your location...
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.mapContent}>
-            <Text style={styles.mapIcon}>🗺️</Text>
-            <Text style={styles.mapPlaceholderTitle}>
-              Interactive Map
-            </Text>
-            <Text style={styles.mapPlaceholderSubtitle}>
-              {location
-                ? `Your location: ${location.latitude.toFixed(4)}°N, ${location.longitude.toFixed(4)}°E`
-                : 'Enable location to see sites near you'}
-            </Text>
-            {selectedSite && (
-              <View style={styles.selectedSitePin}>
-                <Text style={styles.selectedSitePinText}>
-                  📌 {selectedSite.name}
-                </Text>
-              </View>
-            )}
-            <Text style={styles.mapNote}>
-              Full interactive map loads when connected to backend
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* ── Filter Chips ── */}
-      <View style={styles.filterRow}>
-        <ScrollView
+      {/* Filter Chips */}
+      <View style={styles.filterContainer}>
+        <FlatList
+          data={FILTERS}
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterScroll}
-        >
-          {FILTERS.map((filter) => (
+          keyExtractor={(item) => item}
+          contentContainerStyle={styles.filterContent}
+          renderItem={({ item }) => (
             <TouchableOpacity
-              key={filter}
               style={[
                 styles.filterChip,
-                activeFilter === filter && styles.filterChipActive,
+                activeFilter === item && styles.filterChipActive,
               ]}
-              onPress={() => setActiveFilter(filter)}
+              onPress={() => setActiveFilter(item)}
             >
               <Text style={[
                 styles.filterChipText,
-                activeFilter === filter &&
+                activeFilter === item &&
                   styles.filterChipTextActive,
               ]}>
-                {filter}
+                {item}
               </Text>
             </TouchableOpacity>
-          ))}
-        </ScrollView>
+          )}
+        />
       </View>
 
-      {/* ── Tabs ── */}
-      <View style={styles.tabsRow}>
-        {['Sites', 'Nearby'].map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            style={[
-              styles.tab,
-              activeTab === tab && styles.tabActive,
-            ]}
-            onPress={() => setActiveTab(tab)}
+      {/* The Real Map */}
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#006B3F" />
+          <Text style={styles.loadingText}>Loading map...</Text>
+        </View>
+      ) : (
+        <View style={styles.mapContainer}>
+          <MapView
+            style={styles.map}
+            initialRegion={initialRegion}
+            showsUserLocation={true}
+            showsMyLocationButton={true}
           >
-            <Text style={[
-              styles.tabText,
-              activeTab === tab && styles.tabTextActive,
-            ]}>
-              {tab === 'Sites'
-                ? `Sites (${filteredSites.length})`
-                : `Nearby (${NEARBY_PLACES.length})`}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
+            {filteredSites.map((site) => (
+              <Marker
+                key={site.siteId}
+                coordinate={{
+                  latitude: parseFloat(site.latitude),
+                  longitude: parseFloat(site.longitude),
+                }}
+                title={site.name}
+                description={site.region}
+                pinColor={site.color}
+                onCalloutPress={() =>
+                  navigation.navigate('SiteDetail', { site })}
+              />
+            ))}
+          </MapView>
 
-      {/* ── List ── */}
-      <ScrollView
-        style={styles.list}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
-      >
-        {activeTab === 'Sites'
-          ? filteredSites.map(renderSiteItem)
-          : NEARBY_PLACES.map(renderNearbyItem)}
-        <View style={{ height: 30 }} />
-      </ScrollView>
+          {/* Site count badge over map */}
+          <View style={styles.mapBadge}>
+            <Text style={styles.mapBadgeText}>
+              📍 Tap a pin, then tap its name to view details
+            </Text>
+          </View>
+        </View>
+      )}
 
     </View>
   );
 };
 
-// ── Styles ─────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
-
-  // ── Header ───────────────────────────────────
   header: {
     backgroundColor: '#006B3F',
     paddingTop: 55,
     paddingBottom: 16,
     paddingHorizontal: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
   },
   headerTitle: {
     fontSize: 20,
@@ -281,85 +178,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'rgba(255,255,255,0.8)',
   },
-  locationButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  locationButtonIcon: {
-    fontSize: 22,
-  },
-
-  // ── Map Placeholder ───────────────────────────
-  mapPlaceholder: {
-    height: 200,
-    backgroundColor: '#D4EAD0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#C0DFC0',
-  },
-  mapLoading: {
-    alignItems: 'center',
-    gap: 12,
-  },
-  mapLoadingText: {
-    fontSize: 14,
-    color: '#006B3F',
-  },
-  mapContent: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    gap: 6,
-  },
-  mapIcon: {
-    fontSize: 40,
-    marginBottom: 4,
-  },
-  mapPlaceholderTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#006B3F',
-  },
-  mapPlaceholderSubtitle: {
-    fontSize: 12,
-    color: '#2D6A4F',
-    textAlign: 'center',
-  },
-  selectedSitePin: {
-    backgroundColor: '#006B3F',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginTop: 4,
-  },
-  selectedSitePinText: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  mapNote: {
-    fontSize: 11,
-    color: '#888888',
-    marginTop: 4,
-  },
-
-  // ── Filters ──────────────────────────────────
-  filterRow: {
+  filterContainer: {
     backgroundColor: '#ffffff',
     paddingVertical: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
   },
-  filterScroll: {
+  filterContent: {
     paddingHorizontal: 16,
     gap: 8,
   },
   filterChip: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 20,
     borderWidth: 1.5,
@@ -379,154 +209,36 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontWeight: '600',
   },
-
-  // ── Tabs ─────────────────────────────────────
-  tabsRow: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  tab: {
+  loadingContainer: {
     flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-  },
-  tabActive: {
-    borderBottomColor: '#006B3F',
-  },
-  tabText: {
-    fontSize: 14,
-    color: '#888888',
-    fontWeight: '500',
-  },
-  tabTextActive: {
-    color: '#006B3F',
-    fontWeight: '700',
-  },
-
-  // ── List ─────────────────────────────────────
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    padding: 16,
-  },
-
-  // ── Site Item ────────────────────────────────
-  siteItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    gap: 12,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-  },
-  siteItemSelected: {
-    borderColor: '#006B3F',
-    backgroundColor: '#F0F9F4',
-  },
-  siteColorDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-  },
-  siteItemInfo: {
-    flex: 1,
-    gap: 3,
-  },
-  siteItemName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  siteItemRegion: {
-    fontSize: 12,
-    color: '#888888',
-  },
-  siteItemBadgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginTop: 2,
-  },
-  categoryBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  categoryBadgeText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  distanceText: {
-    fontSize: 11,
-    color: '#888888',
-  },
-  directionsBtn: {
-    backgroundColor: '#E8F5EE',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 20,
-  },
-  directionsBtnText: {
-    fontSize: 12,
-    color: '#006B3F',
-    fontWeight: '600',
-  },
-
-  // ── Nearby Item ──────────────────────────────
-  nearbyItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    gap: 12,
-  },
-  nearbyIconBox: {
-    width: 46,
-    height: 46,
-    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  nearbyItemIcon: { fontSize: 22 },
-  nearbyItemInfo: { flex: 1 },
-  nearbyItemName: {
+  loadingText: {
+    marginTop: 12,
     fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 3,
+    color: '#888888',
   },
-  nearbyItemRow: {
-    flexDirection: 'row',
+  mapContainer: {
+    flex: 1,
+  },
+  map: {
+    flex: 1,
+  },
+  mapBadge: {
+    position: 'absolute',
+    top: 12,
+    left: 12,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
     alignItems: 'center',
-    gap: 4,
   },
-  nearbyItemType: {
+  mapBadgeText: {
+    color: '#ffffff',
     fontSize: 12,
-    color: '#888888',
-  },
-  nearbyItemDot: {
-    fontSize: 12,
-    color: '#888888',
-  },
-  nearbyItemRating: {
-    fontSize: 12,
-    color: '#FCA116',
-    fontWeight: '600',
-  },
-  nearbyItemDistance: {
-    fontSize: 12,
-    color: '#006B3F',
-    fontWeight: '600',
   },
 });
 

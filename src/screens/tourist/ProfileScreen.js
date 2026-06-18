@@ -6,13 +6,10 @@ import {
   ScrollView,
   TouchableOpacity,
   StatusBar,
-  Switch,
   Alert,
 } from 'react-native';
 
 const ProfileScreen = ({ navigation }) => {
-  const [darkMode, setDarkMode]   = useState(false);
-  const [notifications, setNotifications] = useState(true);
 
   // Dummy user data — replaced with real data later
   const user = {
@@ -24,12 +21,12 @@ const ProfileScreen = ({ navigation }) => {
     sitesVisited: 12,
     reviewsWritten: 5,
     badges: [
-      { id: '1', icon: '🥾', label: 'Explorer',      earned: true  },
-      { id: '2', icon: '📸', label: 'Photographer',  earned: true  },
-      { id: '3', icon: '🌍', label: 'Trailblazer',   earned: false },
-      { id: '4', icon: '🏰', label: 'Historian',     earned: false },
-      { id: '5', icon: '⭐', label: 'Critic',        earned: true  },
-      { id: '6', icon: '🗺️', label: 'Navigator',     earned: false },
+      { id: '1', icon: '🥾', label: 'Explorer',     earned: true  },
+      { id: '2', icon: '📸', label: 'Photographer', earned: true  },
+      { id: '3', icon: '🌍', label: 'Trailblazer',  earned: false },
+      { id: '4', icon: '🏰', label: 'Historian',    earned: false },
+      { id: '5', icon: '⭐', label: 'Critic',       earned: true  },
+      { id: '6', icon: '🗺️', label: 'Navigator',    earned: false },
     ],
   };
 
@@ -56,8 +53,6 @@ const ProfileScreen = ({ navigation }) => {
         {/* ── Header ── */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>My Profile</Text>
-
-          {/* Avatar */}
           <View style={styles.avatarContainer}>
             <View style={styles.avatar}>
               <Text style={styles.avatarText}>
@@ -67,7 +62,9 @@ const ProfileScreen = ({ navigation }) => {
             <Text style={styles.userName}>{user.name}</Text>
             <Text style={styles.userEmail}>{user.email}</Text>
             <View style={styles.roleBadge}>
-              <Text style={styles.roleBadgeText}>{user.role}</Text>
+              <Text style={styles.roleBadgeText}>
+                {user.role}
+              </Text>
             </View>
           </View>
         </View>
@@ -108,10 +105,7 @@ const ProfileScreen = ({ navigation }) => {
                   !badge.earned && styles.badgeItemLocked,
                 ]}
               >
-                <Text style={[
-                  styles.badgeIcon,
-                  !badge.earned && styles.badgeIconLocked,
-                ]}>
+                <Text style={styles.badgeIcon}>
                   {badge.earned ? badge.icon : '🔒'}
                 </Text>
                 <Text style={[
@@ -134,7 +128,6 @@ const ProfileScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          {/* Photo status cards */}
           {[
             {
               id: '1',
@@ -191,11 +184,9 @@ const ProfileScreen = ({ navigation }) => {
         {/* ── Settings ── */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Settings</Text>
-
           <View style={styles.settingsCard}>
 
-            {/* Notifications toggle */}
-            <View style={styles.settingItem}>
+            <TouchableOpacity style={styles.settingItem}>
               <Text style={styles.settingIcon}>🔔</Text>
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>
@@ -205,42 +196,11 @@ const ProfileScreen = ({ navigation }) => {
                   Photo approvals and alerts
                 </Text>
               </View>
-              <Switch
-                value={notifications}
-                onValueChange={setNotifications}
-                trackColor={{
-                  false: '#E0E0E0',
-                  true: '#006B3F',
-                }}
-                thumbColor="#ffffff"
-              />
-            </View>
+              <Text style={styles.settingArrow}>›</Text>
+            </TouchableOpacity>
 
             <View style={styles.settingDivider} />
 
-            {/* Dark mode toggle */}
-            <View style={styles.settingItem}>
-              <Text style={styles.settingIcon}>🌙</Text>
-              <View style={styles.settingInfo}>
-                <Text style={styles.settingLabel}>Dark Mode</Text>
-                <Text style={styles.settingSubtitle}>
-                  Switch app appearance
-                </Text>
-              </View>
-              <Switch
-                value={darkMode}
-                onValueChange={setDarkMode}
-                trackColor={{
-                  false: '#E0E0E0',
-                  true: '#006B3F',
-                }}
-                thumbColor="#ffffff"
-              />
-            </View>
-
-            <View style={styles.settingDivider} />
-
-            {/* Language */}
             <TouchableOpacity style={styles.settingItem}>
               <Text style={styles.settingIcon}>🌍</Text>
               <View style={styles.settingInfo}>
@@ -252,7 +212,6 @@ const ProfileScreen = ({ navigation }) => {
 
             <View style={styles.settingDivider} />
 
-            {/* Premium */}
             <TouchableOpacity style={styles.settingItem}>
               <Text style={styles.settingIcon}>⭐</Text>
               <View style={styles.settingInfo}>
@@ -275,6 +234,15 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.settingsCard}>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => navigation.navigate('MyTickets')}
+            >
+              <Text style={styles.settingIcon}>🎟️</Text>
+              <Text style={styles.settingLabel}>My Tickets</Text>
+              <Text style={styles.settingArrow}>›</Text>
+            </TouchableOpacity>
+           <View style={styles.settingDivider} />
 
             <TouchableOpacity style={styles.settingItem}>
               <Text style={styles.settingIcon}>✏️</Text>
@@ -296,7 +264,9 @@ const ProfileScreen = ({ navigation }) => {
 
             <TouchableOpacity style={styles.settingItem}>
               <Text style={styles.settingIcon}>❓</Text>
-              <Text style={styles.settingLabel}>Help & Support</Text>
+              <Text style={styles.settingLabel}>
+                Help & Support
+              </Text>
               <Text style={styles.settingArrow}>›</Text>
             </TouchableOpacity>
 
@@ -470,9 +440,6 @@ const styles = StyleSheet.create({
   },
   badgeIcon: {
     fontSize: 28,
-  },
-  badgeIconLocked: {
-    opacity: 0.4,
   },
   badgeLabel: {
     fontSize: 11,

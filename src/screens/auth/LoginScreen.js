@@ -12,43 +12,53 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+// ⬇️ Your backend address
+const BASE_URL = 'http://192.168.100.4:8081/api';
+
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail]             = useState('');
+  const [password, setPassword]       = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [loading, setLoading]         = useState(false);
+  const [error, setError]             = useState('');
 
   const handleLogin = async () => {
-    // Clear previous errors
     setError('');
 
-    // Basic validation
     if (!email || !password) {
       setError('Please fill in all fields');
       return;
     }
-
     if (!email.includes('@')) {
       setError('Please enter a valid email address');
       return;
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
     setLoading(true);
 
-    // Simulate API call for now — we replace this
-    // with real backend call later
-    setTimeout(() => {
+    try {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: email,
+          password: password,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        navigation.replace('Home');
+      } else {
+        setError('Invalid email or password');
+      }
+    } catch (err) {
+      setError('Connection error. Check your network and try again.');
+    } finally {
       setLoading(false);
-      // For now navigate to a placeholder home
-      // Later this checks the role and redirects correctly
-      navigation.replace('Home');
-    }, 1500);
+    }
   };
 
   return (
@@ -79,14 +89,13 @@ const LoginScreen = ({ navigation }) => {
         {/* Form Card */}
         <View style={styles.formCard}>
 
-          {/* Error message */}
           {error ? (
             <View style={styles.errorBox}>
               <Text style={styles.errorText}>⚠ {error}</Text>
             </View>
           ) : null}
 
-          {/* Email Field */}
+          {/* Email */}
           <Text style={styles.label}>Email Address</Text>
           <View style={styles.inputContainer}>
             <Text style={styles.inputIcon}>✉</Text>
@@ -102,7 +111,7 @@ const LoginScreen = ({ navigation }) => {
             />
           </View>
 
-          {/* Password Field */}
+          {/* Password */}
           <Text style={styles.label}>Password</Text>
           <View style={styles.inputContainer}>
             <Text style={styles.inputIcon}>🔒</Text>
@@ -170,27 +179,15 @@ const LoginScreen = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#006B3F',
-  },
-  scrollContent: {
-    flexGrow: 1,
-  },
-
-  // ── Header ─────────────────────────────────────
+  container: { flex: 1, backgroundColor: '#006B3F' },
+  scrollContent: { flexGrow: 1 },
   header: {
     paddingTop: 60,
     paddingBottom: 30,
     paddingHorizontal: 24,
   },
-  backButton: {
-    marginBottom: 20,
-  },
-  backArrow: {
-    fontSize: 24,
-    color: '#ffffff',
-  },
+  backButton: { marginBottom: 20 },
+  backArrow: { fontSize: 24, color: '#ffffff' },
   headerTitle: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -201,8 +198,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: 'rgba(255,255,255,0.8)',
   },
-
-  // ── Form Card ──────────────────────────────────
   formCard: {
     flex: 1,
     backgroundColor: '#ffffff',
@@ -220,10 +215,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
   },
-  errorText: {
-    color: '#CE1126',
-    fontSize: 13,
-  },
+  errorText: { color: '#CE1126', fontSize: 13 },
   label: {
     fontSize: 14,
     fontWeight: '600',
@@ -241,15 +233,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
     height: 52,
   },
-  inputIcon: {
-    fontSize: 16,
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    fontSize: 15,
-    color: '#1A1A1A',
-  },
+  inputIcon: { fontSize: 16, marginRight: 10 },
+  input: { flex: 1, fontSize: 15, color: '#1A1A1A' },
   showText: {
     fontSize: 13,
     color: '#006B3F',
@@ -272,9 +257,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 24,
   },
-  loginButtonDisabled: {
-    backgroundColor: '#4A9A72',
-  },
+  loginButtonDisabled: { backgroundColor: '#4A9A72' },
   loginText: {
     color: '#ffffff',
     fontSize: 16,
@@ -301,10 +284,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  signupPrompt: {
-    fontSize: 14,
-    color: '#888888',
-  },
+  signupPrompt: { fontSize: 14, color: '#888888' },
   signupLink: {
     fontSize: 14,
     color: '#006B3F',

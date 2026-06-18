@@ -8,13 +8,15 @@ import LoginScreen from './src/screens/auth/LoginScreen';
 import SignUpScreen from './src/screens/auth/SignUpScreen';
 import HomeScreen from './src/screens/tourist/HomeScreen';
 import SitesScreen from './src/screens/tourist/SitesScreen';
-import SiteDetailsScreen from './src/screens/tourist/SiteDetailsScreen';
+import SiteDetailScreen from './src/screens/tourist/SiteDetailsScreen';
 import UploadScreen from './src/screens/tourist/UploadScreen';
 import MapScreen from './src/screens/tourist/MapScreen';
 import ProfileScreen from './src/screens/tourist/ProfileScreen';
-import StaffDashboard from './src/screens/staff/StaffDashboard';
-import PhotoModerationScreen from './src/screens/staff/PhotoModerationScreen';
-
+import BuyTicketScreen from './src/screens/tourist/BuyTicketScreen';
+import PaymentScreen from './src/screens/tourist/PaymentScreen';
+import TicketSuccessScreen from './src/screens/tourist/TicketSuccessScreen';
+import MyTicketsScreen from './src/screens/tourist/MyTicketsScreen';
+import VirtualTourScreen from './src/screens/tourist/VirtualTourScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -31,12 +33,15 @@ export default function App() {
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Sites" component={SitesScreen} />
-        <Stack.Screen name="SiteDetail" component={SiteDetailsScreen} />
+        <Stack.Screen name="SiteDetail" component={SiteDetailScreen} />
         <Stack.Screen name="Upload" component={UploadScreen} />
         <Stack.Screen name="Map" component={MapScreen} />
         <Stack.Screen name="Profile" component={ProfileScreen} />
-        <Stack.Screen name="StaffDashboard" component={StaffDashboard} />
-        <Stack.Screen name="PhotoModeration" component={PhotoModerationScreen} />
+        <Stack.Screen name="BuyTicket" component={BuyTicketScreen} />
+        <Stack.Screen name="Payment" component={PaymentScreen} />
+        <Stack.Screen name="TicketSuccess" component={TicketSuccessScreen} />
+        <Stack.Screen name="MyTickets" component={MyTicketsScreen} />
+        <Stack.Screen name="VirtualTour" component={VirtualTourScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

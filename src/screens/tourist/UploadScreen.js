@@ -13,102 +13,106 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 
+// ⬇️ Your backend address
+const BASE_URL = 'http://192.168.100.4:8081/api';
+
 const UploadScreen = ({ route, navigation }) => {
-  const site                = route.params?.site || null;
-  const [caption, setCaption]           = useState('');
-  const [loading, setLoading]           = useState(false);
+  const site = route.params?.site || null;
+  const [caption, setCaption]             = useState('');
+  const [loading, setLoading]             = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
 
-  // ── Ask for permission then open camera ──────
   const handleTakePhoto = async () => {
     const { status } =
       await ImagePicker.requestCameraPermissionsAsync();
-
     if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please allow camera access in your phone settings to take photos.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Permission Required',
+        'Please allow camera access to take photos.');
       return;
     }
-
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.8,
+      quality: 0.7,
     });
-
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+      setSelectedImage(result.assets[0]);
     }
   };
 
-  // ── Ask for permission then open gallery ─────
   const handleChooseFromGallery = async () => {
     const { status } =
       await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (status !== 'granted') {
-      Alert.alert(
-        'Permission Required',
-        'Please allow photo library access in your phone settings.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('Permission Required',
+        'Please allow photo library access.');
       return;
     }
-
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.8,
+      quality: 0.7,
     });
-
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+      setSelectedImage(result.assets[0]);
     }
   };
 
-  // ── Upload handler ────────────────────────────
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!selectedImage) {
-      Alert.alert(
-        'No Photo Selected',
-        'Please select or take a photo first.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('No Photo', 'Please select a photo first.');
       return;
     }
-
     if (!site) {
-      Alert.alert(
-        'No Site Selected',
-        'Please upload photos from a specific site page.',
-        [{ text: 'OK' }]
-      );
+      Alert.alert('No Site',
+        'Please upload from a specific site page.');
       return;
     }
 
     setLoading(true);
 
-    // Simulate upload for now
-    // We replace this with real API call later
-    setTimeout(() => {
+    try {
+      // Build the multipart form data
+      const formData = new FormData();
+      formData.append('file', {
+        uri: selectedImage.uri,
+        name: 'photo.jpg',
+        type: 'image/jpeg',
+      });
+      formData.append('siteId', site.siteId.toString());
+      formData.append('caption', caption);
+
+      const response = await fetch(`${BASE_URL}/photos/upload`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.ok) {
+        Alert.alert(
+          'Photo Uploaded! 🎉',
+          'Your photo has been added to the gallery.',
+          [{ text: 'Great!', onPress: () => navigation.goBack() }]
+        );
+      } else {
+        Alert.alert('Upload Failed',
+          'Could not upload photo. Please try again.');
+      }
+    } catch (err) {
+      Alert.alert('Connection Error',
+        'Check your network and try again.');
+    } finally {
       setLoading(false);
-      Alert.alert(
-        'Photo Submitted! 🎉',
-        'Your photo has been submitted for review. It will appear in the gallery once approved by our team.',
-        [{ text: 'Great!', onPress: () => navigation.goBack() }]
-      );
-    }, 2000);
+    }
   };
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* ── Header ── */}
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -125,7 +129,7 @@ const UploadScreen = ({ route, navigation }) => {
         keyboardShouldPersistTaps="handled"
       >
 
-        {/* ── Site Tag ── */}
+        {/* Site Tag */}
         {site ? (
           <View style={styles.siteTag}>
             <Text style={styles.siteTagIcon}>📍</Text>
@@ -133,7 +137,9 @@ const UploadScreen = ({ route, navigation }) => {
               <Text style={styles.siteTagLabel}>
                 Uploading to
               </Text>
-              <Text style={styles.siteTagName}>{site.name}</Text>
+              <Text style={styles.siteTagName}>
+                {site.name}
+              </Text>
             </View>
             <View style={[styles.siteTagDot,
               { backgroundColor: site.color }]}
@@ -142,20 +148,27 @@ const UploadScreen = ({ route, navigation }) => {
         ) : (
           <View style={styles.noSiteWarning}>
             <Text style={styles.noSiteText}>
-              ⚠ Please upload photos from a site page so your
-              photo is tagged to the correct location.
+              ⚠ Please upload from a site page so your photo
+              is tagged to the correct location.
             </Text>
+            <TouchableOpacity
+              style={styles.chooseSiteButton}
+              onPress={() => navigation.navigate('Sites')}
+            >
+              <Text style={styles.chooseSiteText}>
+                Choose a Site to Upload To →
+              </Text>
+            </TouchableOpacity>
           </View>
         )}
 
-        {/* ── Photo Picker / Preview ── */}
+        {/* Photo Picker / Preview */}
         <Text style={styles.sectionLabel}>Photo</Text>
 
         {selectedImage ? (
-          // Show the actual selected image
           <View style={styles.imagePreviewContainer}>
             <Image
-              source={{ uri: selectedImage }}
+              source={{ uri: selectedImage.uri }}
               style={styles.imagePreview}
             />
             <TouchableOpacity
@@ -168,7 +181,6 @@ const UploadScreen = ({ route, navigation }) => {
             </TouchableOpacity>
           </View>
         ) : (
-          // Show picker options
           <View style={styles.photoPickerContainer}>
             <TouchableOpacity
               style={styles.photoPickerOption}
@@ -179,9 +191,6 @@ const UploadScreen = ({ route, navigation }) => {
               </View>
               <Text style={styles.pickerOptionTitle}>
                 Take Photo
-              </Text>
-              <Text style={styles.pickerOptionSubtitle}>
-                Use your camera
               </Text>
             </TouchableOpacity>
 
@@ -196,16 +205,13 @@ const UploadScreen = ({ route, navigation }) => {
                 <Text style={styles.pickerIcon}>🖼️</Text>
               </View>
               <Text style={styles.pickerOptionTitle}>
-                Choose from Gallery
-              </Text>
-              <Text style={styles.pickerOptionSubtitle}>
-                Pick an existing photo
+                Gallery
               </Text>
             </TouchableOpacity>
           </View>
         )}
 
-        {/* ── Caption ── */}
+        {/* Caption */}
         <Text style={styles.sectionLabel}>
           Caption{' '}
           <Text style={styles.optionalText}>(optional)</Text>
@@ -213,7 +219,7 @@ const UploadScreen = ({ route, navigation }) => {
         <View style={styles.captionContainer}>
           <TextInput
             style={styles.captionInput}
-            placeholder="Describe what you see or share your experience..."
+            placeholder="Describe what you see..."
             placeholderTextColor="#aaaaaa"
             value={caption}
             onChangeText={setCaption}
@@ -226,41 +232,11 @@ const UploadScreen = ({ route, navigation }) => {
           </Text>
         </View>
 
-        {/* ── Guidelines ── */}
-        <View style={styles.guidelinesCard}>
-          <Text style={styles.guidelinesTitle}>
-            📋 Photo Guidelines
-          </Text>
-          {[
-            'Photo must be taken at the site you are uploading to',
-            'Clear and well-lit images are more likely to be approved',
-            'No inappropriate, offensive, or unrelated content',
-            'Avoid photos with personal information visible',
-            'Duplicate photos will be rejected automatically',
-          ].map((guideline, index) => (
-            <View key={index} style={styles.guidelineItem}>
-              <Text style={styles.guidelineDot}>•</Text>
-              <Text style={styles.guidelineText}>{guideline}</Text>
-            </View>
-          ))}
-        </View>
-
-        {/* ── Moderation Notice ── */}
-        <View style={styles.moderationNotice}>
-          <Text style={styles.moderationIcon}>🛡️</Text>
-          <Text style={styles.moderationText}>
-            All photos are reviewed by our team before going live.
-            This usually takes less than 24 hours.
-          </Text>
-        </View>
-
-        {/* ── Upload Button ── */}
+        {/* Upload Button */}
         <TouchableOpacity
-          style={[
-            styles.uploadButton,
+          style={[styles.uploadButton,
             (!selectedImage || loading) &&
-              styles.uploadButtonDisabled,
-          ]}
+              styles.uploadButtonDisabled]}
           onPress={handleUpload}
           disabled={!selectedImage || loading}
         >
@@ -285,10 +261,7 @@ const UploadScreen = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F5F5F5',
-  },
+  container: { flex: 1, backgroundColor: '#F5F5F5' },
   header: {
     backgroundColor: '#006B3F',
     paddingTop: 55,
@@ -298,23 +271,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-  },
-  backArrow: {
-    fontSize: 24,
-    color: '#ffffff',
-  },
+  backButton: { width: 40, height: 40, justifyContent: 'center' },
+  backArrow: { fontSize: 24, color: '#ffffff' },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#FCD116',
   },
-  scrollContent: {
-    padding: 20,
-  },
+  scrollContent: { padding: 20 },
   siteTag: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -338,11 +302,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1A1A1A',
   },
-  siteTagDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
+  siteTagDot: { width: 12, height: 12, borderRadius: 6 },
   noSiteWarning: {
     backgroundColor: '#FFF3E0',
     borderRadius: 12,
@@ -355,6 +315,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#E65100',
     lineHeight: 20,
+  },
+  chooseSiteButton: {
+    backgroundColor: '#006B3F',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  chooseSiteText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   sectionLabel: {
     fontSize: 14,
@@ -379,7 +352,7 @@ const styles = StyleSheet.create({
   photoPickerOption: {
     flex: 1,
     alignItems: 'center',
-    padding: 20,
+    padding: 24,
   },
   pickerIconCircle: {
     width: 56,
@@ -392,21 +365,14 @@ const styles = StyleSheet.create({
   },
   pickerIcon: { fontSize: 26 },
   pickerOptionTitle: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '600',
     color: '#1A1A1A',
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  pickerOptionSubtitle: {
-    fontSize: 11,
-    color: '#888888',
-    textAlign: 'center',
   },
   pickerDivider: {
     width: 1,
     backgroundColor: '#E0E0E0',
-    marginVertical: 16,
+    marginVertical: 20,
   },
   imagePreviewContainer: {
     marginBottom: 24,
@@ -415,10 +381,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E0E0',
   },
-  imagePreview: {
-    width: '100%',
-    height: 220,
-  },
+  imagePreview: { width: '100%', height: 220 },
   changePhotoButton: {
     backgroundColor: '#ffffff',
     padding: 12,
@@ -451,63 +414,13 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginTop: 8,
   },
-  guidelinesCard: {
-    backgroundColor: '#FFFBE6',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#FCD116',
-  },
-  guidelinesTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    marginBottom: 12,
-  },
-  guidelineItem: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 6,
-  },
-  guidelineDot: {
-    fontSize: 14,
-    color: '#888888',
-    marginTop: 1,
-  },
-  guidelineText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#555555',
-    lineHeight: 19,
-  },
-  moderationNotice: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0F9F4',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 24,
-    gap: 10,
-    borderWidth: 1,
-    borderColor: '#006B3F',
-  },
-  moderationIcon: { fontSize: 20 },
-  moderationText: {
-    flex: 1,
-    fontSize: 13,
-    color: '#006B3F',
-    lineHeight: 19,
-  },
   uploadButton: {
     backgroundColor: '#006B3F',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
   },
-  uploadButtonDisabled: {
-    backgroundColor: '#A0C4B4',
-  },
+  uploadButtonDisabled: { backgroundColor: '#A0C4B4' },
   uploadButtonText: {
     color: '#ffffff',
     fontSize: 16,

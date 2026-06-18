@@ -1,26 +1,56 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Image,
   TextInput,
   StatusBar,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
-import {
-  CATEGORIES,
-  FEATURED_SITES,
-  RECENT_PHOTOS,
-} from '../../utils/data';
 
+// ⬇️ Your backend address
+const BASE_URL = 'http://192.168.100.4:8081/api';
 
-// ── Component ──────────────────────────────────────────────
+const CATEGORIES = [
+  { id: '1', name: 'All',        icon: '🌍' },
+  { id: '2', name: 'Historical', icon: '🏛️' },
+  { id: '3', name: 'Wildlife',   icon: '🐘' },
+  { id: '4', name: 'Beach',      icon: '🏖️' },
+  { id: '5', name: 'Cultural',   icon: '🎭' },
+  { id: '6', name: 'Religious',  icon: '🕌' },
+];
+
+const RECENT_PHOTOS = [
+  { id: '1', site: 'Cape Coast Castle',   uploader: 'Kwame A.', color: '#1A4A6B' },
+  { id: '2', site: 'Kakum National Park', uploader: 'Ama S.',   color: '#2D6A4F' },
+  { id: '3', site: 'Labadi Beach',        uploader: 'Kofi M.',  color: '#C0873F' },
+  { id: '4', site: 'Elmina Castle',       uploader: 'Abena T.', color: '#6B1A1A' },
+];
+
 const HomeScreen = ({ navigation }) => {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [searchText, setSearchText] = useState('');
+  const [featuredSites, setFeaturedSites]   = useState([]);
+  const [loading, setLoading]               = useState(true);
+
+  useEffect(() => {
+    loadFeaturedSites();
+  }, []);
+
+  const loadFeaturedSites = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${BASE_URL}/sites`);
+      const data = await response.json();
+      setFeaturedSites(data.slice(0, 5));
+    } catch (err) {
+      console.error('Error loading sites:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -37,25 +67,28 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.greeting}>Good day! 👋</Text>
               <Text style={styles.headerTitle}>Explore Ghana</Text>
             </View>
-            <TouchableOpacity style={styles.profileButton}>
+            <TouchableOpacity
+              style={styles.profileButton}
+              onPress={() => navigation.navigate('Profile')}
+            >
               <Text style={styles.profileInitial}>T</Text>
             </TouchableOpacity>
           </View>
 
           {/* Search Bar */}
-          <View style={styles.searchBar}>
+          <TouchableOpacity
+            style={styles.searchBar}
+            onPress={() => navigation.navigate('Sites')}
+            activeOpacity={0.7}
+          >
             <Text style={styles.searchIcon}>🔍</Text>
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search tourist sites..."
-              placeholderTextColor="#aaaaaa"
-              value={searchText}
-              onChangeText={setSearchText}
-            />
-          </View>
+            <Text style={styles.searchInputPlaceholder}>
+              Search tourist sites...
+            </Text>
+          </TouchableOpacity>
         </View>
 
-        {/* ── Category Filter ── */}
+        {/* ── Categories ── */}
         <View style={styles.sectionContainer}>
           <FlatList
             data={CATEGORIES}
@@ -69,16 +102,17 @@ const HomeScreen = ({ navigation }) => {
                   activeCategory === item.name &&
                     styles.categoryChipActive,
                 ]}
-                onPress={() => setActiveCategory(item.name)}
+                onPress={() => {
+                  setActiveCategory(item.name);
+                  navigation.navigate('Sites');
+                }}
               >
                 <Text style={styles.categoryIcon}>{item.icon}</Text>
-                <Text
-                  style={[
-                    styles.categoryText,
-                    activeCategory === item.name &&
-                      styles.categoryTextActive,
-                  ]}
-                >
+                <Text style={[
+                  styles.categoryText,
+                  activeCategory === item.name &&
+                    styles.categoryTextActive,
+                ]}>
                   {item.name}
                 </Text>
               </TouchableOpacity>
@@ -90,53 +124,60 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Featured Sites</Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Sites')}
+            >
               <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
 
-          <FlatList
-            data={FEATURED_SITES}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={[styles.siteCard,
-                  { backgroundColor: item.color }]}
-                onPress={() => navigation.navigate('SiteDetail',
-                  { site: item })}
-              >
-                {/* Category badge */}
-                <View style={styles.categoryBadge}>
-                  <Text style={styles.categoryBadgeText}>
-                    {item.category}
-                  </Text>
-                </View>
-
-                {/* Site name */}
-                <Text style={styles.siteName}>{item.name}</Text>
-
-                {/* Region and rating */}
-                <View style={styles.siteFooter}>
-                  <Text style={styles.siteRegion}>
-                    📍 {item.region}
-                  </Text>
-                  <View style={styles.ratingBadge}>
-                    <Text style={styles.ratingText}>
-                      ★ {item.rating}
+          {loading ? (
+            <ActivityIndicator
+              size="large"
+              color="#006B3F"
+              style={{ marginVertical: 40 }}
+            />
+          ) : (
+            <FlatList
+              data={featuredSites}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.siteId.toString()}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={[styles.siteCard,
+                    { backgroundColor: item.color || '#1A4A6B' }]}
+                  onPress={() => navigation.navigate('SiteDetail',
+                    { site: item })}
+                >
+                  <View style={styles.categoryBadge}>
+                    <Text style={styles.categoryBadgeText}>
+                      {item.category}
                     </Text>
                   </View>
-                </View>
-              </TouchableOpacity>
-            )}
-          />
+                  <Text style={styles.siteName}>{item.name}</Text>
+                  <View style={styles.siteFooter}>
+                    <Text style={styles.siteRegion}>
+                      📍 {item.region}
+                    </Text>
+                    <View style={styles.ratingBadge}>
+                      <Text style={styles.ratingText}>
+                        ★ {item.rating}
+                      </Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          )}
         </View>
 
         {/* ── Quick Stats ── */}
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>200+</Text>
+            <Text style={styles.statNumber}>
+              {featuredSites.length > 0 ? '11+' : '...'}
+            </Text>
             <Text style={styles.statLabel}>Tourist Sites</Text>
           </View>
           <View style={styles.statCard}>
@@ -149,7 +190,7 @@ const HomeScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* ── Recent Community Photos ── */}
+        {/* ── Community Photos ── */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
@@ -197,16 +238,12 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.eventMonth}>AUG</Text>
             </View>
             <View style={styles.eventInfo}>
-              <Text style={styles.eventName}>
-                Homowo Festival
-              </Text>
+              <Text style={styles.eventName}>Homowo Festival</Text>
               <Text style={styles.eventLocation}>
                 📍 Greater Accra Region
               </Text>
               <View style={styles.eventBadge}>
-                <Text style={styles.eventBadgeText}>
-                  Cultural
-                </Text>
+                <Text style={styles.eventBadgeText}>Cultural</Text>
               </View>
             </View>
             <Text style={styles.eventArrow}>›</Text>
@@ -242,7 +279,7 @@ const HomeScreen = ({ navigation }) => {
 
       </ScrollView>
 
-      {/* ── Bottom Navigation Bar ── */}
+      {/* ── Bottom Navigation ── */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem}>
           <Text style={styles.navIconActive}>🏠</Text>
@@ -262,13 +299,15 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.navIcon}>🗺️</Text>
           <Text style={styles.navLabel}>Map</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} 
+        <TouchableOpacity
+          style={styles.navItem}
           onPress={() => navigation.navigate('Upload')}
         >
           <Text style={styles.navIcon}>📸</Text>
           <Text style={styles.navLabel}>Upload</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem}
+        <TouchableOpacity
+          style={styles.navItem}
           onPress={() => navigation.navigate('Profile')}
         >
           <Text style={styles.navIcon}>👤</Text>
@@ -280,7 +319,6 @@ const HomeScreen = ({ navigation }) => {
   );
 };
 
-// ── Styles ─────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -289,8 +327,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 20,
   },
-
-  // ── Header ───────────────────────────────────
   header: {
     backgroundColor: '#006B3F',
     paddingTop: 55,
@@ -340,13 +376,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginRight: 10,
   },
-  searchInput: {
+  searchInputPlaceholder: {
     flex: 1,
     fontSize: 14,
-    color: '#1A1A1A',
+    color: '#aaaaaa',
   },
-
-  // ── Sections ─────────────────────────────────
   sectionContainer: {
     marginTop: 24,
     paddingHorizontal: 20,
@@ -367,8 +401,6 @@ const styles = StyleSheet.create({
     color: '#006B3F',
     fontWeight: '600',
   },
-
-  // ── Categories ───────────────────────────────
   categoryChip: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -396,8 +428,6 @@ const styles = StyleSheet.create({
   categoryTextActive: {
     color: '#ffffff',
   },
-
-  // ── Site Cards ───────────────────────────────
   siteCard: {
     width: 220,
     height: 140,
@@ -444,8 +474,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1A1A1A',
   },
-
-  // ── Stats ────────────────────────────────────
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -471,8 +499,6 @@ const styles = StyleSheet.create({
     color: '#888888',
     textAlign: 'center',
   },
-
-  // ── Photos Grid ──────────────────────────────
   photosGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -500,8 +526,6 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     fontSize: 10,
   },
-
-  // ── Events ───────────────────────────────────
   eventCard: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
@@ -561,8 +585,6 @@ const styles = StyleSheet.create({
     color: '#CCCCCC',
     marginLeft: 8,
   },
-
-  // ── Bottom Navigation ─────────────────────────
   bottomNav: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
