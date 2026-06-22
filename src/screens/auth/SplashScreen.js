@@ -4,6 +4,8 @@ import {
   Text,
   StyleSheet,
   StatusBar,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 
 const SplashScreen = ({ navigation }) => {
@@ -20,24 +22,29 @@ const SplashScreen = ({ navigation }) => {
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Star symbol */}
-      <Text style={styles.star}>★</Text>
+      {/* Your Logo */}
+      <View style={styles.logoContainer}>
+        <Image
+          source={require('../../../assets/icon.png')}
+          style={styles.logo}
+          resizeMode="contain"
+        />
+      </View>
 
       {/* App name */}
       <Text style={styles.appName}>VisitGhana</Text>
 
-      {/* Divider line */}
-      <View style={styles.divider} />
-
       {/* Tagline */}
       <Text style={styles.tagline}>
-        Discover, Navigate & Share{'\n'}Ghana's Heritage
+        Discover Ghana's Treasures
       </Text>
 
-      {/* Bottom text */}
-      <Text style={styles.bottomText}>
-        Your complete tourism companion
-      </Text>
+      {/* Loading spinner */}
+      <ActivityIndicator
+        size="small"
+        color="#FCD116"
+        style={styles.spinner}
+      />
 
     </View>
   );
@@ -51,38 +58,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
-  star: {
-    fontSize: 60,
-    color: '#000000',
-    marginBottom: 20,
+  logoContainer: {
+    width: 130,
+    height: 130,
+    borderRadius: 32,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 28,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  logo: {
+    width: 95,
+    height: 95,
   },
   appName: {
-    fontSize: 52,
+    fontSize: 44,
     fontWeight: 'bold',
     color: '#FCD116',
-    letterSpacing: 2,
-    marginBottom: 16,
-  },
-  divider: {
-    width: 60,
-    height: 3,
-    backgroundColor: '#FCD116',
-    marginBottom: 16,
-    borderRadius: 2,
+    letterSpacing: 1.5,
+    marginBottom: 12,
   },
   tagline: {
     fontSize: 16,
-    color: '#ffffff',
+    color: 'rgba(255,255,255,0.9)',
     textAlign: 'center',
-    lineHeight: 26,
-    marginBottom: 60,
+    marginBottom: 50,
   },
-  bottomText: {
-    position: 'absolute',
-    bottom: 50,
-    fontSize: 12,
-    color: 'rgba(255,255,255,0.6)',
-    letterSpacing: 1,
+  spinner: {
+    marginTop: 10,
   },
 });
 

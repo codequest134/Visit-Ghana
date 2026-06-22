@@ -187,12 +187,12 @@ export const SITES = [
 ];
 
 export const CATEGORIES = [
-  { id: '1', name: 'All', icon: '🌍' },
-  { id: '2', name: 'Historical', icon: '🏛️' },
-  { id: '3', name: 'Wildlife', icon: '🐘' },
-  { id: '4', name: 'Beach', icon: '🏖️' },
-  { id: '5', name: 'Cultural', icon: '🎭' },
-  { id: '6', name: 'Religious', icon: '🕌' },
+  { id: '1', name: 'All' },
+  { id: '2', name: 'Historical' },
+  { id: '3', name: 'Wildlife' },
+  { id: '4', name: 'Beach' },
+  { id: '5', name: 'Cultural' },
+  { id: '6', name: 'Religious' },
 ];
 
 export const FILTERS = [

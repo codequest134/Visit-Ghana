@@ -8,10 +8,12 @@ import {
   StatusBar,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import BottomNav from '../../components/BottomNav';
 
 const ProfileScreen = ({ navigation }) => {
 
-  // Dummy user data — replaced with real data later
+  // Dummy user data
   const user = {
     name: 'Kwame Mensah',
     email: 'kwame@example.com',
@@ -21,13 +23,21 @@ const ProfileScreen = ({ navigation }) => {
     sitesVisited: 12,
     reviewsWritten: 5,
     badges: [
-      { id: '1', icon: '🥾', label: 'Explorer',     earned: true  },
-      { id: '2', icon: '📸', label: 'Photographer', earned: true  },
-      { id: '3', icon: '🌍', label: 'Trailblazer',  earned: false },
-      { id: '4', icon: '🏰', label: 'Historian',    earned: false },
-      { id: '5', icon: '⭐', label: 'Critic',       earned: true  },
-      { id: '6', icon: '🗺️', label: 'Navigator',    earned: false },
+      { id: '1', icon: 'walk',          label: 'Explorer',     earned: true  },
+      { id: '2', icon: 'camera',        label: 'Photographer', earned: true  },
+      { id: '3', icon: 'compass',       label: 'Trailblazer',  earned: false },
+      { id: '4', icon: 'business',      label: 'Historian',    earned: false },
+      { id: '5', icon: 'star',          label: 'Critic',       earned: true  },
+      { id: '6', icon: 'map',           label: 'Navigator',    earned: false },
     ],
+  };
+
+  const showComingSoon = (feature) => {
+    Alert.alert(
+      feature,
+      'This feature is coming soon in a future update!',
+      [{ text: 'OK' }]
+    );
   };
 
   const handleLogout = () => {
@@ -105,9 +115,11 @@ const ProfileScreen = ({ navigation }) => {
                   !badge.earned && styles.badgeItemLocked,
                 ]}
               >
-                <Text style={styles.badgeIcon}>
-                  {badge.earned ? badge.icon : '🔒'}
-                </Text>
+                <Ionicons
+                  name={badge.earned ? badge.icon : 'lock-closed'}
+                  size={26}
+                  color={badge.earned ? '#006B3F' : '#AAAAAA'}
+                />
                 <Text style={[
                   styles.badgeLabel,
                   !badge.earned && styles.badgeLabelLocked,
@@ -123,7 +135,9 @@ const ProfileScreen = ({ navigation }) => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>My Photos</Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Sites')}
+            >
               <Text style={styles.seeAllText}>See All</Text>
             </TouchableOpacity>
           </View>
@@ -173,8 +187,8 @@ const ProfileScreen = ({ navigation }) => {
                     : styles.statusPendingText,
                 ]}>
                   {photo.status === 'approved'
-                    ? '✓ Approved'
-                    : '⏳ Pending'}
+                    ? 'Approved'
+                    : 'Pending'}
                 </Text>
               </View>
             </View>
@@ -186,8 +200,16 @@ const ProfileScreen = ({ navigation }) => {
           <Text style={styles.sectionTitle}>Settings</Text>
           <View style={styles.settingsCard}>
 
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingIcon}>🔔</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => showComingSoon('Push Notifications')}
+            >
+              <Ionicons
+                name="notifications-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>
                   Push Notifications
@@ -196,24 +218,40 @@ const ProfileScreen = ({ navigation }) => {
                   Photo approvals and alerts
                 </Text>
               </View>
-              <Text style={styles.settingArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
             </TouchableOpacity>
 
             <View style={styles.settingDivider} />
 
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingIcon}>🌍</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => showComingSoon('Language Settings')}
+            >
+              <Ionicons
+                name="globe-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>Language</Text>
                 <Text style={styles.settingSubtitle}>English</Text>
               </View>
-              <Text style={styles.settingArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
             </TouchableOpacity>
 
             <View style={styles.settingDivider} />
 
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingIcon}>⭐</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => showComingSoon('Premium Membership')}
+            >
+              <Ionicons
+                name="star-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
               <View style={styles.settingInfo}>
                 <Text style={styles.settingLabel}>
                   Upgrade to Premium
@@ -238,46 +276,84 @@ const ProfileScreen = ({ navigation }) => {
               style={styles.settingItem}
               onPress={() => navigation.navigate('MyTickets')}
             >
-              <Text style={styles.settingIcon}>🎟️</Text>
+              <Ionicons
+                name="ticket-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
               <Text style={styles.settingLabel}>My Tickets</Text>
-              <Text style={styles.settingArrow}>›</Text>
-            </TouchableOpacity>
-           <View style={styles.settingDivider} />
-
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingIcon}>✏️</Text>
-              <Text style={styles.settingLabel}>Edit Profile</Text>
-              <Text style={styles.settingArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
             </TouchableOpacity>
 
             <View style={styles.settingDivider} />
 
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingIcon}>🔒</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => showComingSoon('Edit Profile')}
+            >
+              <Ionicons
+                name="create-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
+              <Text style={styles.settingLabel}>Edit Profile</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => showComingSoon('Change Password')}
+            >
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
               <Text style={styles.settingLabel}>
                 Change Password
               </Text>
-              <Text style={styles.settingArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
             </TouchableOpacity>
 
             <View style={styles.settingDivider} />
 
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingIcon}>❓</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => showComingSoon('Help & Support')}
+            >
+              <Ionicons
+                name="help-circle-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
               <Text style={styles.settingLabel}>
                 Help & Support
               </Text>
-              <Text style={styles.settingArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
             </TouchableOpacity>
 
             <View style={styles.settingDivider} />
 
-            <TouchableOpacity style={styles.settingItem}>
-              <Text style={styles.settingIcon}>📄</Text>
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => showComingSoon('Terms & Privacy Policy')}
+            >
+              <Ionicons
+                name="document-text-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
               <Text style={styles.settingLabel}>
                 Terms & Privacy Policy
               </Text>
-              <Text style={styles.settingArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
             </TouchableOpacity>
 
           </View>
@@ -289,6 +365,7 @@ const ProfileScreen = ({ navigation }) => {
             style={styles.logoutButton}
             onPress={handleLogout}
           >
+            <Ionicons name="log-out-outline" size={20} color="#CE1126" />
             <Text style={styles.logoutText}>Logout</Text>
           </TouchableOpacity>
 
@@ -297,8 +374,10 @@ const ProfileScreen = ({ navigation }) => {
           </Text>
         </View>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
+      {/* Bottom Navigation */}
+      <BottomNav navigation={navigation} activeRoute="Profile" />
     </View>
   );
 };
@@ -308,8 +387,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
-
-  // ── Header ───────────────────────────────────
   header: {
     backgroundColor: '#006B3F',
     paddingTop: 55,
@@ -367,8 +444,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-
-  // ── Stats ─────────────────────────────────────
   statsRow: {
     flexDirection: 'row',
     backgroundColor: '#ffffff',
@@ -394,8 +469,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#F0F0F0',
     marginVertical: 8,
   },
-
-  // ── Section ───────────────────────────────────
   section: {
     paddingHorizontal: 20,
     marginBottom: 24,
@@ -417,8 +490,6 @@ const styles = StyleSheet.create({
     color: '#006B3F',
     fontWeight: '600',
   },
-
-  // ── Badges ───────────────────────────────────
   badgesGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -438,9 +509,6 @@ const styles = StyleSheet.create({
     borderColor: '#E0E0E0',
     backgroundColor: '#F8F8F8',
   },
-  badgeIcon: {
-    fontSize: 28,
-  },
   badgeLabel: {
     fontSize: 11,
     fontWeight: '600',
@@ -450,8 +518,6 @@ const styles = StyleSheet.create({
   badgeLabelLocked: {
     color: '#AAAAAA',
   },
-
-  // ── Photo Status ──────────────────────────────
   photoStatusCard: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -500,8 +566,6 @@ const styles = StyleSheet.create({
   statusPendingText: {
     color: '#E65100',
   },
-
-  // ── Settings ──────────────────────────────────
   settingsCard: {
     backgroundColor: '#ffffff',
     borderRadius: 16,
@@ -514,7 +578,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   settingIcon: {
-    fontSize: 20,
     width: 28,
     textAlign: 'center',
   },
@@ -522,6 +585,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingLabel: {
+    flex: 1,
     fontSize: 14,
     fontWeight: '500',
     color: '#1A1A1A',
@@ -530,10 +594,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#888888',
     marginTop: 1,
-  },
-  settingArrow: {
-    fontSize: 20,
-    color: '#CCCCCC',
   },
   settingDivider: {
     height: 1,
@@ -551,15 +611,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1A1A1A',
   },
-
-  // ── Logout ────────────────────────────────────
   logoutButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
     backgroundColor: '#FFF0F0',
     borderWidth: 1.5,
     borderColor: '#CE1126',
     paddingVertical: 16,
     borderRadius: 12,
-    alignItems: 'center',
     marginBottom: 16,
   },
   logoutText: {

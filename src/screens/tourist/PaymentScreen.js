@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { Ionicons } from '@expo/vector-icons';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -22,14 +23,12 @@ const PaymentScreen = ({ route, navigation }) => {
   const handleNavigationChange = (navState) => {
     const { url } = navState;
 
-    // Paystack success/completion indicators
     if (
       url.includes('paystack.co/close') ||
       url.includes('trxref') ||
       url.includes('reference=') ||
       url.includes('/success')
     ) {
-      // Payment likely complete — show confirm button
       setPaymentDone(true);
     }
   };
@@ -87,9 +86,12 @@ const PaymentScreen = ({ route, navigation }) => {
             );
           }}
         >
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#ffffff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Secure Payment</Text>
+        <View style={styles.headerTitleRow}>
+          <Ionicons name="lock-closed" size={16} color="#FCD116" />
+          <Text style={styles.headerTitle}>Secure Payment</Text>
+        </View>
         <View style={{ width: 24 }} />
       </View>
 
@@ -122,11 +124,20 @@ const PaymentScreen = ({ route, navigation }) => {
 
           {/* Confirm Button — always visible at bottom */}
           <View style={styles.confirmBar}>
-            <Text style={styles.confirmHint}>
-              {paymentDone
-                ? '✓ Payment complete? Tap below to get your ticket'
-                : 'After paying, tap below to confirm'}
-            </Text>
+            <View style={styles.confirmHintRow}>
+              {paymentDone && (
+                <Ionicons
+                  name="checkmark-circle"
+                  size={16}
+                  color="#006B3F"
+                />
+              )}
+              <Text style={styles.confirmHint}>
+                {paymentDone
+                  ? 'Payment complete? Tap below to get your ticket'
+                  : 'After paying, tap below to confirm'}
+              </Text>
+            </View>
             <TouchableOpacity
               style={[
                 styles.confirmButton,
@@ -159,9 +170,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  backArrow: {
-    fontSize: 24,
-    color: '#ffffff',
+  headerTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   headerTitle: {
     fontSize: 18,
@@ -195,11 +207,17 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
   },
+  confirmHintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginBottom: 10,
+  },
   confirmHint: {
     fontSize: 13,
     color: '#888888',
     textAlign: 'center',
-    marginBottom: 10,
   },
   confirmButton: {
     backgroundColor: '#A0C4B4',

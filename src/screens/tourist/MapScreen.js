@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 import * as Location from 'expo-location';
+import { Ionicons } from '@expo/vector-icons';
+import BottomNav from '../../components/BottomNav';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -127,6 +129,7 @@ const MapScreen = ({ navigation }) => {
             initialRegion={initialRegion}
             showsUserLocation={true}
             showsMyLocationButton={true}
+            mapPadding={{ bottom: 80, top: 0, left: 0, right: 0 }}
           >
             {filteredSites.map((site) => (
               <Marker
@@ -146,13 +149,16 @@ const MapScreen = ({ navigation }) => {
 
           {/* Site count badge over map */}
           <View style={styles.mapBadge}>
+            <Ionicons name="location-sharp" size={14} color="#ffffff" />
             <Text style={styles.mapBadgeText}>
-              📍 Tap a pin, then tap its name to view details
+              Tap a pin, then tap its name to view details
             </Text>
           </View>
         </View>
       )}
 
+      {/* Bottom Navigation */}
+      <BottomNav navigation={navigation} activeRoute="Map" />
     </View>
   );
 };
@@ -226,6 +232,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   mapBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     position: 'absolute',
     top: 12,
     left: 12,
@@ -234,7 +243,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 20,
-    alignItems: 'center',
+    justifyContent: 'center',
   },
   mapBadgeText: {
     color: '#ffffff',

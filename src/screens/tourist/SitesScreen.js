@@ -9,6 +9,8 @@ import {
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import BottomNav from '../../components/BottomNav';
 
 const BASE_URL = 'http://192.168.100.4:8081/api';
 
@@ -64,7 +66,12 @@ const SitesScreen = ({ navigation }) => {
         { backgroundColor: item.color || '#1A4A6B' }]}>
         {item.isVerified && (
           <View style={styles.verifiedBadge}>
-            <Text style={styles.verifiedText}>✓ Verified</Text>
+            <Ionicons
+              name="checkmark-circle"
+              size={12}
+              color="#ffffff"
+            />
+            <Text style={styles.verifiedText}>Verified</Text>
           </View>
         )}
         <View style={styles.categoryBadge}>
@@ -76,14 +83,21 @@ const SitesScreen = ({ navigation }) => {
 
       <View style={styles.cardContent}>
         <Text style={styles.siteName}>{item.name}</Text>
-        <Text style={styles.siteRegion}>📍 {item.region}</Text>
+        <View style={styles.siteRegionRow}>
+          <Ionicons
+            name="location-sharp"
+            size={13}
+            color="#888888"
+          />
+          <Text style={styles.siteRegion}>{item.region}</Text>
+        </View>
         <Text style={styles.siteDescription} numberOfLines={2}>
           {item.description}
         </Text>
 
         <View style={styles.cardFooter}>
           <View style={styles.ratingRow}>
-            <Text style={styles.starIcon}>★</Text>
+            <Ionicons name="star" size={14} color="#FCD116" />
             <Text style={styles.ratingText}>{item.rating}</Text>
             <Text style={styles.reviewCount}>
               ({item.reviewCount} reviews)
@@ -94,7 +108,12 @@ const SitesScreen = ({ navigation }) => {
             onPress={() =>
               navigation.navigate('SiteDetail', { site: item })}
           >
-            <Text style={styles.viewButtonText}>View →</Text>
+            <Text style={styles.viewButtonText}>View</Text>
+            <Ionicons
+              name="arrow-forward"
+              size={14}
+              color="#006B3F"
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -107,9 +126,13 @@ const SitesScreen = ({ navigation }) => {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
+        {navigation.canGoBack() ? (
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 24 }} />
+        )}
         <Text style={styles.headerTitle}>Tourist Sites</Text>
         <Text style={styles.siteCount}>
           {filteredSites.length} sites
@@ -119,7 +142,12 @@ const SitesScreen = ({ navigation }) => {
       {/* Search */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <Ionicons
+            name="search"
+            size={18}
+            color="#888888"
+            style={styles.searchIcon}
+          />
           <TextInput
             style={styles.searchInput}
             placeholder="Search sites or regions..."
@@ -129,7 +157,11 @@ const SitesScreen = ({ navigation }) => {
           />
           {searchText.length > 0 && (
             <TouchableOpacity onPress={() => setSearchText('')}>
-              <Text style={styles.clearText}>✕</Text>
+              <Ionicons
+                name="close-circle"
+                size={18}
+                color="#888888"
+              />
             </TouchableOpacity>
           )}
         </View>
@@ -171,7 +203,12 @@ const SitesScreen = ({ navigation }) => {
         </View>
       ) : error ? (
         <View style={styles.centerContainer}>
-          <Text style={styles.errorIcon}>⚠️</Text>
+          <Ionicons
+            name="warning"
+            size={48}
+            color="#CE1126"
+            style={{ marginBottom: 16 }}
+          />
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity
             style={styles.retryButton}
@@ -182,7 +219,12 @@ const SitesScreen = ({ navigation }) => {
         </View>
       ) : filteredSites.length === 0 ? (
         <View style={styles.centerContainer}>
-          <Text style={styles.emptyIcon}>🔍</Text>
+          <Ionicons
+            name="search"
+            size={48}
+            color="#CCCCCC"
+            style={{ marginBottom: 16 }}
+          />
           <Text style={styles.emptyTitle}>No sites found</Text>
           <Text style={styles.emptySubtitle}>
             Try a different search or filter
@@ -198,6 +240,8 @@ const SitesScreen = ({ navigation }) => {
         />
       )}
 
+      {/* Bottom Navigation */}
+      <BottomNav navigation={navigation} activeRoute="Sites" />
     </View>
   );
 };
@@ -215,10 +259,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  backArrow: {
-    fontSize: 24,
-    color: '#ffffff',
   },
   headerTitle: {
     fontSize: 20,
@@ -243,18 +283,12 @@ const styles = StyleSheet.create({
     height: 46,
   },
   searchIcon: {
-    fontSize: 16,
     marginRight: 10,
   },
   searchInput: {
     flex: 1,
     fontSize: 14,
     color: '#1A1A1A',
-  },
-  clearText: {
-    fontSize: 14,
-    color: '#888888',
-    paddingHorizontal: 4,
   },
   filterContainer: {
     backgroundColor: '#ffffff',
@@ -287,7 +321,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     padding: 16,
-    paddingBottom: 30,
+    paddingBottom: 100,
   },
   siteCard: {
     backgroundColor: '#ffffff',
@@ -308,6 +342,9 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   verifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -338,10 +375,15 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     marginBottom: 4,
   },
+  siteRegionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginBottom: 8,
+  },
   siteRegion: {
     fontSize: 13,
     color: '#888888',
-    marginBottom: 8,
   },
   siteDescription: {
     fontSize: 13,
@@ -357,23 +399,21 @@ const styles = StyleSheet.create({
   ratingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  starIcon: {
-    color: '#FCD116',
-    fontSize: 14,
-    marginRight: 4,
+    gap: 4,
   },
   ratingText: {
     fontSize: 14,
     fontWeight: 'bold',
     color: '#1A1A1A',
-    marginRight: 4,
   },
   reviewCount: {
     fontSize: 12,
     color: '#888888',
   },
   viewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: '#E8F5EE',
     paddingHorizontal: 14,
     paddingVertical: 7,
@@ -395,10 +435,6 @@ const styles = StyleSheet.create({
     color: '#888888',
     marginTop: 12,
   },
-  errorIcon: {
-    fontSize: 48,
-    marginBottom: 16,
-  },
   errorText: {
     fontSize: 14,
     color: '#CE1126',
@@ -416,10 +452,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 18,

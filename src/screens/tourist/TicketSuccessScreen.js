@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
+import { Ionicons } from '@expo/vector-icons';
 
 const TicketSuccessScreen = ({ route, navigation }) => {
   const { ticket } = route.params;
@@ -19,7 +20,7 @@ const TicketSuccessScreen = ({ route, navigation }) => {
 
         {/* Success Icon */}
         <View style={styles.successCircle}>
-          <Text style={styles.checkmark}>✓</Text>
+          <Ionicons name="checkmark" size={50} color="#006B3F" />
         </View>
 
         <Text style={styles.successTitle}>
@@ -42,18 +43,18 @@ const TicketSuccessScreen = ({ route, navigation }) => {
               {ticket.siteName}
             </Text>
 
-            {/* QR Code Placeholder */}
-            <View style={styles.qrPlaceholder}>
+            {/* QR Code */}
+            <View style={styles.qrContainer}>
               <QRCode
                 value={ticket.ticketCode || 'VG-TICKET'}
-                size ={140}
+                size={140}
                 color="#1A1A1A"
                 backgroundColor="#ffffff"
               />
-              <Text style={styles.qrCode}>
-                {ticket.ticketCode}
-              </Text>
             </View>
+            <Text style={styles.qrCode}>
+              {ticket.ticketCode}
+            </Text>
 
             <View style={styles.ticketDetails}>
               <View style={styles.detailRow}>
@@ -77,8 +78,13 @@ const TicketSuccessScreen = ({ route, navigation }) => {
               <View style={styles.detailRow}>
                 <Text style={styles.detailLabel}>Status</Text>
                 <View style={styles.paidBadge}>
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={13}
+                    color="#006B3F"
+                  />
                   <Text style={styles.paidBadgeText}>
-                    ✓ Paid
+                    Paid
                   </Text>
                 </View>
               </View>
@@ -89,6 +95,7 @@ const TicketSuccessScreen = ({ route, navigation }) => {
         <Text style={styles.ticketNote}>
           Show this ticket code at the entrance gate
         </Text>
+
         <TouchableOpacity
           style={styles.viewTicketsButton}
           onPress={() => navigation.navigate('MyTickets')}
@@ -97,6 +104,7 @@ const TicketSuccessScreen = ({ route, navigation }) => {
             View My Tickets
           </Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           style={styles.doneButton}
           onPress={() => navigation.navigate('Home')}
@@ -124,11 +132,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20,
-  },
-  checkmark: {
-    fontSize: 50,
-    color: '#006B3F',
-    fontWeight: 'bold',
   },
   successTitle: {
     fontSize: 26,
@@ -170,34 +173,20 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  qrPlaceholder: {
-    width: 140,
-    height: 140,
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    borderWidth: 2,
-    borderColor: '#E0E0E0',
-    borderStyle: 'dashed',
-  },
   qrContainer: {
-    alignItems: 'center',
     padding: 16,
     backgroundColor: '#ffffff',
     borderRadius: 12,
-    marginBottom: 20,
-  },
-  qrIcon: {
-    fontSize: 60,
-    color: '#1A1A1A',
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    marginBottom: 12,
   },
   qrCode: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#006B3F',
-    marginTop: 8,
+    letterSpacing: 2,
+    marginBottom: 20,
   },
   ticketDetails: {
     width: '100%',
@@ -223,6 +212,9 @@ const styles = StyleSheet.create({
     color: '#006B3F',
   },
   paidBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: '#E8F5EE',
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -239,6 +231,20 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
   },
+  viewTicketsButton: {
+    width: '100%',
+    borderWidth: 1.5,
+    borderColor: '#FCD116',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  viewTicketsText: {
+    color: '#FCD116',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   doneButton: {
     width: '100%',
     backgroundColor: '#FCD116',
@@ -251,20 +257,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  viewTicketsButton: {
-  width: '100%',
-  borderWidth: 1.5,
-  borderColor: '#FCD116',
-  paddingVertical: 16,
-  borderRadius: 12,
-  alignItems: 'center',
-  marginBottom: 12,
-},
-viewTicketsText: {
-  color: '#FCD116',
-  fontSize: 16,
-  fontWeight: 'bold',
-},
 });
 
 export default TicketSuccessScreen;

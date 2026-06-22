@@ -10,6 +10,7 @@ import {
   Image,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 // backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -23,7 +24,6 @@ const SiteDetailScreen = ({ route, navigation }) => {
 
   const TABS = ['About', 'History', 'Photos', 'Reviews'];
 
-  // Fetch real photos when the Photos tab is opened
   useEffect(() => {
     if (activeTab === 'Photos') {
       loadPhotos();
@@ -108,22 +108,22 @@ const SiteDetailScreen = ({ route, navigation }) => {
             {/* Info cards */}
             <View style={styles.infoGrid}>
               <View style={styles.infoCard}>
-                <Text style={styles.infoIcon}>🕐</Text>
+                <Ionicons name="time-outline" size={24} color="#006B3F" />
                 <Text style={styles.infoLabel}>Opening Hours</Text>
                 <Text style={styles.infoValue}>8:00 AM – 5:00 PM</Text>
               </View>
               <View style={styles.infoCard}>
-                <Text style={styles.infoIcon}>🎟️</Text>
+                <Ionicons name="ticket-outline" size={24} color="#006B3F" />
                 <Text style={styles.infoLabel}>Entry Fee</Text>
                 <Text style={styles.infoValue}>GHS 40 / Adult</Text>
               </View>
               <View style={styles.infoCard}>
-                <Text style={styles.infoIcon}>📍</Text>
+                <Ionicons name="location-outline" size={24} color="#006B3F" />
                 <Text style={styles.infoLabel}>Region</Text>
                 <Text style={styles.infoValue}>{site.region}</Text>
               </View>
               <View style={styles.infoCard}>
-                <Text style={styles.infoIcon}>🏷️</Text>
+                <Ionicons name="pricetag-outline" size={24} color="#006B3F" />
                 <Text style={styles.infoLabel}>Category</Text>
                 <Text style={styles.infoValue}>{site.category}</Text>
               </View>
@@ -134,8 +134,8 @@ const SiteDetailScreen = ({ route, navigation }) => {
               style={styles.virtualTourButton}
               onPress={() => navigation.navigate('VirtualTour', { site })}
             >
-              <Text style={styles.virtualTourIcon}>🌐</Text>
-              <View>
+              <Ionicons name="globe-outline" size={24} color="#006B3F" />
+              <View style={styles.featureBtnTextWrap}>
                 <Text style={styles.virtualTourTitle}>
                   360° Virtual Tour
                 </Text>
@@ -143,19 +143,19 @@ const SiteDetailScreen = ({ route, navigation }) => {
                   Explore via Google Street View
                 </Text>
               </View>
-              <Text style={styles.virtualTourArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={22} color="#006B3F" />
             </TouchableOpacity>
 
             {/* Audio Guide Button */}
             <TouchableOpacity style={styles.audioButton}>
-              <Text style={styles.audioIcon}>🎧</Text>
-              <View>
+              <Ionicons name="headset-outline" size={24} color="#E65100" />
+              <View style={styles.featureBtnTextWrap}>
                 <Text style={styles.audioTitle}>Audio Guide</Text>
                 <Text style={styles.audioSubtitle}>
                   Listen to the full site history
                 </Text>
               </View>
-              <Text style={styles.audioArrow}>›</Text>
+              <Ionicons name="chevron-forward" size={22} color="#FFA000" />
             </TouchableOpacity>
 
             {/* Nearby Section */}
@@ -168,9 +168,11 @@ const SiteDetailScreen = ({ route, navigation }) => {
                   backgroundColor: place.type === 'Hotel'
                     ? '#E8F5EE' : '#FFF3E0',
                 }]}>
-                  <Text style={styles.nearbyIconText}>
-                    {place.type === 'Hotel' ? '🏨' : '🍽️'}
-                  </Text>
+                  <Ionicons
+                    name={place.type === 'Hotel' ? 'bed-outline' : 'restaurant-outline'}
+                    size={20}
+                    color={place.type === 'Hotel' ? '#006B3F' : '#E65100'}
+                  />
                 </View>
                 <View style={styles.nearbyInfo}>
                   <Text style={styles.nearbyName}>{place.name}</Text>
@@ -255,7 +257,12 @@ const SiteDetailScreen = ({ route, navigation }) => {
               />
             ) : photos.length === 0 ? (
               <View style={styles.noPhotosContainer}>
-                <Text style={styles.noPhotosIcon}>📷</Text>
+                <Ionicons
+                  name="camera-outline"
+                  size={48}
+                  color="#CCCCCC"
+                  style={{ marginBottom: 12 }}
+                />
                 <Text style={styles.noPhotosTitle}>
                   No photos yet
                 </Text>
@@ -311,10 +318,16 @@ const SiteDetailScreen = ({ route, navigation }) => {
             <View style={styles.ratingSummary}>
               <Text style={styles.bigRating}>{site.rating}</Text>
               <View style={styles.ratingDetails}>
-                <Text style={styles.starsRow}>
-                  {'★'.repeat(Math.round(site.rating))}
-                  {'☆'.repeat(5 - Math.round(site.rating))}
-                </Text>
+                <View style={styles.starsRow}>
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Ionicons
+                      key={n}
+                      name={n <= Math.round(site.rating) ? 'star' : 'star-outline'}
+                      size={18}
+                      color="#FCD116"
+                    />
+                  ))}
+                </View>
                 <Text style={styles.ratingSubtext}>
                   Based on {site.reviewCount} reviews
                 </Text>
@@ -363,9 +376,16 @@ const SiteDetailScreen = ({ route, navigation }) => {
                       {review.date}
                     </Text>
                   </View>
-                  <Text style={styles.reviewStars}>
-                    {'★'.repeat(review.rating)}
-                  </Text>
+                  <View style={styles.reviewStarsRow}>
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Ionicons
+                        key={i}
+                        name="star"
+                        size={14}
+                        color="#FCD116"
+                      />
+                    ))}
+                  </View>
                 </View>
                 <Text style={styles.reviewComment}>
                   {review.comment}
@@ -394,15 +414,17 @@ const SiteDetailScreen = ({ route, navigation }) => {
               style={styles.heroBtn}
               onPress={() => navigation.goBack()}
             >
-              <Text style={styles.heroBtnText}>←</Text>
+              <Ionicons name="arrow-back" size={22} color="#ffffff" />
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.heroBtn}
               onPress={() => setSaved(!saved)}
             >
-              <Text style={styles.heroBtnText}>
-                {saved ? '❤️' : '🤍'}
-              </Text>
+              <Ionicons
+                name={saved ? 'heart' : 'heart-outline'}
+                size={22}
+                color={saved ? '#CE1126' : '#ffffff'}
+              />
             </TouchableOpacity>
           </View>
 
@@ -414,19 +436,28 @@ const SiteDetailScreen = ({ route, navigation }) => {
                 </Text>
               </View>
               <View style={styles.heroVerifiedBadge}>
+                <Ionicons
+                  name="checkmark-circle"
+                  size={12}
+                  color="#FCD116"
+                />
                 <Text style={styles.heroVerifiedText}>
-                  ✓ Verified
+                  Verified
                 </Text>
               </View>
             </View>
             <Text style={styles.heroSiteName}>{site.name}</Text>
-            <Text style={styles.heroRegion}>
-              📍 {site.region}
-            </Text>
+            <View style={styles.heroRegionRow}>
+              <Ionicons
+                name="location-sharp"
+                size={14}
+                color="rgba(255,255,255,0.85)"
+              />
+              <Text style={styles.heroRegion}>{site.region}</Text>
+            </View>
             <View style={styles.heroRatingRow}>
-              <Text style={styles.heroRating}>
-                ★ {site.rating}
-              </Text>
+              <Ionicons name="star" size={15} color="#FCD116" />
+              <Text style={styles.heroRating}>{site.rating}</Text>
               <Text style={styles.heroReviews}>
                 ({site.reviewCount} reviews)
               </Text>
@@ -440,22 +471,22 @@ const SiteDetailScreen = ({ route, navigation }) => {
             style={styles.actionBtn}
             onPress={openDirections}
           >
-            <Text style={styles.actionBtnIcon}>🗺️</Text>
+            <Ionicons name="navigate-outline" size={24} color="#006B3F" />
             <Text style={styles.actionBtnText}>Directions</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
             onPress={() => navigation.navigate('BuyTicket', { site })}
           >
-            <Text style={styles.actionBtnIcon}>🎟️</Text>
+            <Ionicons name="ticket-outline" size={24} color="#006B3F" />
             <Text style={styles.actionBtnText}>Buy Ticket</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn}>
-            <Text style={styles.actionBtnIcon}>📤</Text>
+            <Ionicons name="share-social-outline" size={24} color="#006B3F" />
             <Text style={styles.actionBtnText}>Share</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionBtn}>
-            <Text style={styles.actionBtnIcon}>🗓️</Text>
+            <Ionicons name="calendar-outline" size={24} color="#006B3F" />
             <Text style={styles.actionBtnText}>Plan Trip</Text>
           </TouchableOpacity>
         </View>
@@ -509,7 +540,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  heroBtnText: { fontSize: 18, color: '#ffffff' },
   heroContent: { gap: 6 },
   heroBadgeRow: {
     flexDirection: 'row',
@@ -528,6 +558,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   heroVerifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     backgroundColor: 'rgba(252,209,22,0.3)',
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -544,6 +577,11 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     lineHeight: 34,
   },
+  heroRegionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
   heroRegion: {
     fontSize: 14,
     color: 'rgba(255,255,255,0.85)',
@@ -551,7 +589,7 @@ const styles = StyleSheet.create({
   heroRatingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 4,
   },
   heroRating: {
     fontSize: 15,
@@ -572,7 +610,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F0F0F0',
   },
   actionBtn: { alignItems: 'center', gap: 4 },
-  actionBtnIcon: { fontSize: 22 },
   actionBtnText: {
     fontSize: 11,
     color: '#555555',
@@ -630,12 +667,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     alignItems: 'center',
+    gap: 6,
   },
-  infoIcon: { fontSize: 22, marginBottom: 6 },
   infoLabel: {
     fontSize: 11,
     color: '#888888',
-    marginBottom: 4,
   },
   infoValue: {
     fontSize: 13,
@@ -654,7 +690,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#006B3F',
   },
-  virtualTourIcon: { fontSize: 24 },
+  featureBtnTextWrap: {
+    flex: 1,
+  },
   virtualTourTitle: {
     fontSize: 14,
     fontWeight: 'bold',
@@ -663,11 +701,6 @@ const styles = StyleSheet.create({
   virtualTourSubtitle: {
     fontSize: 12,
     color: '#888888',
-  },
-  virtualTourArrow: {
-    fontSize: 22,
-    color: '#006B3F',
-    marginLeft: 'auto',
   },
   audioButton: {
     flexDirection: 'row',
@@ -680,7 +713,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFA000',
   },
-  audioIcon: { fontSize: 24 },
   audioTitle: {
     fontSize: 14,
     fontWeight: 'bold',
@@ -689,11 +721,6 @@ const styles = StyleSheet.create({
   audioSubtitle: {
     fontSize: 12,
     color: '#888888',
-  },
-  audioArrow: {
-    fontSize: 22,
-    color: '#FFA000',
-    marginLeft: 'auto',
   },
   nearbyCard: {
     flexDirection: 'row',
@@ -711,7 +738,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  nearbyIconText: { fontSize: 20 },
   nearbyInfo: { flex: 1 },
   nearbyName: {
     fontSize: 14,
@@ -751,7 +777,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 40,
   },
-  noPhotosIcon: { fontSize: 48, marginBottom: 12 },
   noPhotosTitle: {
     fontSize: 16,
     fontWeight: 'bold',
@@ -812,8 +837,8 @@ const styles = StyleSheet.create({
   },
   ratingDetails: { flex: 1 },
   starsRow: {
-    fontSize: 20,
-    color: '#FCD116',
+    flexDirection: 'row',
+    gap: 2,
     marginBottom: 4,
   },
   ratingSubtext: { fontSize: 12, color: '#888888' },
@@ -878,7 +903,10 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
   },
   reviewDate: { fontSize: 12, color: '#888888' },
-  reviewStars: { fontSize: 14, color: '#FCD116' },
+  reviewStarsRow: {
+    flexDirection: 'row',
+    gap: 1,
+  },
   reviewComment: {
     fontSize: 13,
     color: '#555555',

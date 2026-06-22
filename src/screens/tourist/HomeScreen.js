@@ -5,22 +5,23 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  TextInput,
   StatusBar,
   FlatList,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import BottomNav from '../../components/BottomNav';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
 
 const CATEGORIES = [
-  { id: '1', name: 'All',        icon: '🌍' },
-  { id: '2', name: 'Historical', icon: '🏛️' },
-  { id: '3', name: 'Wildlife',   icon: '🐘' },
-  { id: '4', name: 'Beach',      icon: '🏖️' },
-  { id: '5', name: 'Cultural',   icon: '🎭' },
-  { id: '6', name: 'Religious',  icon: '🕌' },
+  { id: '1', name: 'All' },
+  { id: '2', name: 'Historical' },
+  { id: '3', name: 'Wildlife' },
+  { id: '4', name: 'Beach' },
+  { id: '5', name: 'Cultural' },
+  { id: '6', name: 'Religious' },
 ];
 
 const RECENT_PHOTOS = [
@@ -64,14 +65,14 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.header}>
           <View style={styles.headerTop}>
             <View>
-              <Text style={styles.greeting}>Good day! 👋</Text>
+              <Text style={styles.greeting}>Good day!</Text>
               <Text style={styles.headerTitle}>Explore Ghana</Text>
             </View>
             <TouchableOpacity
               style={styles.profileButton}
               onPress={() => navigation.navigate('Profile')}
             >
-              <Text style={styles.profileInitial}>T</Text>
+              <Ionicons name="person" size={20} color="#006B3F" />
             </TouchableOpacity>
           </View>
 
@@ -81,7 +82,12 @@ const HomeScreen = ({ navigation }) => {
             onPress={() => navigation.navigate('Sites')}
             activeOpacity={0.7}
           >
-            <Text style={styles.searchIcon}>🔍</Text>
+            <Ionicons
+              name="search"
+              size={18}
+              color="#888888"
+              style={styles.searchIcon}
+            />
             <Text style={styles.searchInputPlaceholder}>
               Search tourist sites...
             </Text>
@@ -107,7 +113,6 @@ const HomeScreen = ({ navigation }) => {
                   navigation.navigate('Sites');
                 }}
               >
-                <Text style={styles.categoryIcon}>{item.icon}</Text>
                 <Text style={[
                   styles.categoryText,
                   activeCategory === item.name &&
@@ -157,12 +162,20 @@ const HomeScreen = ({ navigation }) => {
                   </View>
                   <Text style={styles.siteName}>{item.name}</Text>
                   <View style={styles.siteFooter}>
-                    <Text style={styles.siteRegion}>
-                      📍 {item.region}
-                    </Text>
+                    <View style={styles.siteRegionRow}>
+                      <Ionicons
+                        name="location-sharp"
+                        size={12}
+                        color="rgba(255,255,255,0.85)"
+                      />
+                      <Text style={styles.siteRegion}>
+                        {item.region}
+                      </Text>
+                    </View>
                     <View style={styles.ratingBadge}>
+                      <Ionicons name="star" size={11} color="#1A1A1A" />
                       <Text style={styles.ratingText}>
-                        ★ {item.rating}
+                        {item.rating}
                       </Text>
                     </View>
                   </View>
@@ -239,14 +252,21 @@ const HomeScreen = ({ navigation }) => {
             </View>
             <View style={styles.eventInfo}>
               <Text style={styles.eventName}>Homowo Festival</Text>
-              <Text style={styles.eventLocation}>
-                📍 Greater Accra Region
-              </Text>
+              <View style={styles.eventLocationRow}>
+                <Ionicons
+                  name="location-sharp"
+                  size={12}
+                  color="#888888"
+                />
+                <Text style={styles.eventLocation}>
+                  Greater Accra Region
+                </Text>
+              </View>
               <View style={styles.eventBadge}>
                 <Text style={styles.eventBadgeText}>Cultural</Text>
               </View>
             </View>
-            <Text style={styles.eventArrow}>›</Text>
+            <Ionicons name="chevron-forward" size={22} color="#CCCCCC" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.eventCard}>
@@ -259,9 +279,16 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.eventName}>
                 Chale Wote Festival
               </Text>
-              <Text style={styles.eventLocation}>
-                📍 Accra, James Town
-              </Text>
+              <View style={styles.eventLocationRow}>
+                <Ionicons
+                  name="location-sharp"
+                  size={12}
+                  color="#888888"
+                />
+                <Text style={styles.eventLocation}>
+                  Accra, James Town
+                </Text>
+              </View>
               <View style={[styles.eventBadge,
                 { backgroundColor: '#E3F0FF' }]}>
                 <Text style={[styles.eventBadgeText,
@@ -270,7 +297,7 @@ const HomeScreen = ({ navigation }) => {
                 </Text>
               </View>
             </View>
-            <Text style={styles.eventArrow}>›</Text>
+            <Ionicons name="chevron-forward" size={22} color="#CCCCCC" />
           </TouchableOpacity>
 
         </View>
@@ -280,40 +307,7 @@ const HomeScreen = ({ navigation }) => {
       </ScrollView>
 
       {/* ── Bottom Navigation ── */}
-      <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem}>
-          <Text style={styles.navIconActive}>🏠</Text>
-          <Text style={styles.navLabelActive}>Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Sites')}
-        >
-          <Text style={styles.navIcon}>🏛️</Text>
-          <Text style={styles.navLabel}>Sites</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Map')}
-        >
-          <Text style={styles.navIcon}>🗺️</Text>
-          <Text style={styles.navLabel}>Map</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Upload')}
-        >
-          <Text style={styles.navIcon}>📸</Text>
-          <Text style={styles.navLabel}>Upload</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.navItem}
-          onPress={() => navigation.navigate('Profile')}
-        >
-          <Text style={styles.navIcon}>👤</Text>
-          <Text style={styles.navLabel}>Profile</Text>
-        </TouchableOpacity>
-      </View>
+      <BottomNav navigation={navigation} activeRoute="Home" />
 
     </View>
   );
@@ -359,11 +353,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  profileInitial: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#006B3F',
-  },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -373,7 +362,6 @@ const styles = StyleSheet.create({
     height: 46,
   },
   searchIcon: {
-    fontSize: 16,
     marginRight: 10,
   },
   searchInputPlaceholder: {
@@ -416,10 +404,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#006B3F',
     borderColor: '#006B3F',
   },
-  categoryIcon: {
-    fontSize: 14,
-    marginRight: 6,
-  },
   categoryText: {
     fontSize: 13,
     color: '#555555',
@@ -459,11 +443,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  siteRegionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    flex: 1,
+  },
   siteRegion: {
     fontSize: 11,
     color: 'rgba(255,255,255,0.85)',
   },
   ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
     backgroundColor: '#FCD116',
     paddingHorizontal: 8,
     paddingVertical: 3,
@@ -563,10 +556,15 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
     marginBottom: 4,
   },
+  eventLocationRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginBottom: 6,
+  },
   eventLocation: {
     fontSize: 12,
     color: '#888888',
-    marginBottom: 6,
   },
   eventBadge: {
     backgroundColor: '#E8F5EE',
@@ -577,45 +575,6 @@ const styles = StyleSheet.create({
   },
   eventBadgeText: {
     fontSize: 11,
-    color: '#006B3F',
-    fontWeight: '600',
-  },
-  eventArrow: {
-    fontSize: 22,
-    color: '#CCCCCC',
-    marginLeft: 8,
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#ffffff',
-    paddingVertical: 10,
-    paddingBottom: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-  navItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  navIcon: {
-    fontSize: 22,
-    marginBottom: 3,
-    opacity: 0.4,
-  },
-  navIconActive: {
-    fontSize: 22,
-    marginBottom: 3,
-  },
-  navLabel: {
-    fontSize: 10,
-    color: '#888888',
-  },
-  navLabelActive: {
-    fontSize: 10,
     color: '#006B3F',
     fontWeight: '600',
   },

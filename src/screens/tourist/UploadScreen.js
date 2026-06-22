@@ -11,7 +11,9 @@ import {
   Alert,
   Image,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import BottomNav from '../../components/BottomNav';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -49,7 +51,7 @@ const UploadScreen = ({ route, navigation }) => {
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.7,
@@ -73,7 +75,6 @@ const UploadScreen = ({ route, navigation }) => {
     setLoading(true);
 
     try {
-      // Build the multipart form data
       const formData = new FormData();
       formData.append('file', {
         uri: selectedImage.uri,
@@ -93,7 +94,7 @@ const UploadScreen = ({ route, navigation }) => {
 
       if (response.ok) {
         Alert.alert(
-          'Photo Uploaded! 🎉',
+          'Photo Uploaded!',
           'Your photo has been added to the gallery.',
           [{ text: 'Great!', onPress: () => navigation.goBack() }]
         );
@@ -114,12 +115,16 @@ const UploadScreen = ({ route, navigation }) => {
       <StatusBar barStyle="light-content" />
 
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backArrow}>←</Text>
-        </TouchableOpacity>
+        {route.params?.site ? (
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#ffffff" />
+          </TouchableOpacity>
+        ) : (
+          <View style={{ width: 40 }} />
+        )}
         <Text style={styles.headerTitle}>Add Photo</Text>
         <View style={{ width: 40 }} />
       </View>
@@ -132,7 +137,11 @@ const UploadScreen = ({ route, navigation }) => {
         {/* Site Tag */}
         {site ? (
           <View style={styles.siteTag}>
-            <Text style={styles.siteTagIcon}>📍</Text>
+            <Ionicons
+              name="location-sharp"
+              size={22}
+              color="#006B3F"
+            />
             <View style={styles.siteTagInfo}>
               <Text style={styles.siteTagLabel}>
                 Uploading to
@@ -147,16 +156,19 @@ const UploadScreen = ({ route, navigation }) => {
           </View>
         ) : (
           <View style={styles.noSiteWarning}>
-            <Text style={styles.noSiteText}>
-              ⚠ Please upload from a site page so your photo
-              is tagged to the correct location.
-            </Text>
+            <View style={styles.noSiteRow}>
+              <Ionicons name="warning" size={18} color="#E65100" />
+              <Text style={styles.noSiteText}>
+                Please upload from a site page so your photo
+                is tagged to the correct location.
+              </Text>
+            </View>
             <TouchableOpacity
               style={styles.chooseSiteButton}
               onPress={() => navigation.navigate('Sites')}
             >
               <Text style={styles.chooseSiteText}>
-                Choose a Site to Upload To →
+                Choose a Site to Upload To
               </Text>
             </TouchableOpacity>
           </View>
@@ -175,8 +187,9 @@ const UploadScreen = ({ route, navigation }) => {
               style={styles.changePhotoButton}
               onPress={() => setSelectedImage(null)}
             >
+              <Ionicons name="close" size={16} color="#CE1126" />
               <Text style={styles.changePhotoText}>
-                ✕  Change Photo
+                Change Photo
               </Text>
             </TouchableOpacity>
           </View>
@@ -187,7 +200,7 @@ const UploadScreen = ({ route, navigation }) => {
               onPress={handleTakePhoto}
             >
               <View style={styles.pickerIconCircle}>
-                <Text style={styles.pickerIcon}>📷</Text>
+                <Ionicons name="camera" size={26} color="#006B3F" />
               </View>
               <Text style={styles.pickerOptionTitle}>
                 Take Photo
@@ -202,7 +215,7 @@ const UploadScreen = ({ route, navigation }) => {
             >
               <View style={[styles.pickerIconCircle,
                 { backgroundColor: '#E8F0FF' }]}>
-                <Text style={styles.pickerIcon}>🖼️</Text>
+                <Ionicons name="images" size={26} color="#1A4A6B" />
               </View>
               <Text style={styles.pickerOptionTitle}>
                 Gallery
@@ -254,8 +267,10 @@ const UploadScreen = ({ route, navigation }) => {
           )}
         </TouchableOpacity>
 
-        <View style={{ height: 40 }} />
+        <View style={{ height: 100 }} />
       </ScrollView>
+      {/* Bottom Navigation */}
+      <BottomNav navigation={navigation} activeRoute="Upload" />
     </View>
   );
 };
@@ -272,7 +287,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   backButton: { width: 40, height: 40, justifyContent: 'center' },
-  backArrow: { fontSize: 24, color: '#ffffff' },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -290,7 +304,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E0E0E0',
   },
-  siteTagIcon: { fontSize: 22 },
   siteTagInfo: { flex: 1 },
   siteTagLabel: {
     fontSize: 11,
@@ -311,7 +324,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#FFA000',
   },
+  noSiteRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+  },
   noSiteText: {
+    flex: 1,
     fontSize: 13,
     color: '#E65100',
     lineHeight: 20,
@@ -363,7 +382,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  pickerIcon: { fontSize: 26 },
   pickerOptionTitle: {
     fontSize: 14,
     fontWeight: '600',
@@ -383,9 +401,12 @@ const styles = StyleSheet.create({
   },
   imagePreview: { width: '100%', height: 220 },
   changePhotoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     backgroundColor: '#ffffff',
     padding: 12,
-    alignItems: 'center',
     borderTopWidth: 1,
     borderTopColor: '#E0E0E0',
   },

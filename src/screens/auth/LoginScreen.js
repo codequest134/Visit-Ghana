@@ -11,6 +11,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -78,7 +79,7 @@ const LoginScreen = ({ navigation }) => {
             style={styles.backButton}
             onPress={() => navigation.goBack()}
           >
-            <Text style={styles.backArrow}>←</Text>
+            <Ionicons name="arrow-back" size={24} color="#ffffff" />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Welcome Back</Text>
           <Text style={styles.headerSubtitle}>
@@ -91,14 +92,24 @@ const LoginScreen = ({ navigation }) => {
 
           {error ? (
             <View style={styles.errorBox}>
-              <Text style={styles.errorText}>⚠ {error}</Text>
+              <Ionicons
+                name="alert-circle"
+                size={16}
+                color="#CE1126"
+              />
+              <Text style={styles.errorText}>{error}</Text>
             </View>
           ) : null}
 
           {/* Email */}
           <Text style={styles.label}>Email Address</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.inputIcon}>✉</Text>
+            <Ionicons
+              name="mail-outline"
+              size={20}
+              color="#888888"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Enter your email"
@@ -114,7 +125,12 @@ const LoginScreen = ({ navigation }) => {
           {/* Password */}
           <Text style={styles.label}>Password</Text>
           <View style={styles.inputContainer}>
-            <Text style={styles.inputIcon}>🔒</Text>
+            <Ionicons
+              name="lock-closed-outline"
+              size={20}
+              color="#888888"
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Enter your password"
@@ -127,9 +143,11 @@ const LoginScreen = ({ navigation }) => {
             <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
             >
-              <Text style={styles.showText}>
-                {showPassword ? 'Hide' : 'Show'}
-              </Text>
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color="#888888"
+              />
             </TouchableOpacity>
           </View>
 
@@ -187,7 +205,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   backButton: { marginBottom: 20 },
-  backArrow: { fontSize: 24, color: '#ffffff' },
   headerTitle: {
     fontSize: 32,
     fontWeight: 'bold',
@@ -208,6 +225,9 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   errorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     backgroundColor: '#FFF3F3',
     borderWidth: 1,
     borderColor: '#CE1126',
@@ -215,7 +235,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 16,
   },
-  errorText: { color: '#CE1126', fontSize: 13 },
+  errorText: { color: '#CE1126', fontSize: 13, flex: 1 },
   label: {
     fontSize: 14,
     fontWeight: '600',
@@ -233,13 +253,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAFAFA',
     height: 52,
   },
-  inputIcon: { fontSize: 16, marginRight: 10 },
+  inputIcon: { marginRight: 10 },
   input: { flex: 1, fontSize: 15, color: '#1A1A1A' },
-  showText: {
-    fontSize: 13,
-    color: '#006B3F',
-    fontWeight: '600',
-  },
   forgotContainer: {
     alignItems: 'flex-end',
     marginTop: 10,

@@ -8,6 +8,8 @@ import {
   StatusBar,
   ActivityIndicator,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import QRCode from 'react-native-qrcode-svg';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -18,7 +20,6 @@ const MyTicketsScreen = ({ navigation }) => {
   const [error, setError]     = useState(null);
 
   // For now userId is hardcoded as 1
-  // Later this comes from the logged-in user
   const userId = 1;
 
   useEffect(() => {
@@ -33,7 +34,6 @@ const MyTicketsScreen = ({ navigation }) => {
       );
       if (!response.ok) throw new Error('Failed to fetch');
       const data = await response.json();
-      // Show newest tickets first
       setTickets(data.reverse());
       setError(null);
     } catch (err) {
@@ -58,6 +58,15 @@ const MyTicketsScreen = ({ navigation }) => {
             ? styles.statusPaid
             : styles.statusPending,
         ]}>
+          <Ionicons
+            name={item.paymentStatus === 'paid'
+              ? 'checkmark-circle'
+              : 'time'}
+            size={13}
+            color={item.paymentStatus === 'paid'
+              ? '#006B3F'
+              : '#E65100'}
+          />
           <Text style={[
             styles.statusText,
             item.paymentStatus === 'paid'
@@ -65,8 +74,8 @@ const MyTicketsScreen = ({ navigation }) => {
               : styles.statusTextPending,
           ]}>
             {item.paymentStatus === 'paid'
-              ? '✓ Paid'
-              : '⏳ Pending'}
+              ? 'Paid'
+              : 'Pending'}
           </Text>
         </View>
       </View>
@@ -100,6 +109,14 @@ const MyTicketsScreen = ({ navigation }) => {
         {/* Ticket code */}
         {item.ticketCode && (
           <View style={styles.codeContainer}>
+             <View style={styles.qrWrapper}>
+              <QRCode
+                value={item.ticketCode}
+                size={100}
+                color="#1A1A1A"
+                backgroundColor="#ffffff"
+              />
+            </View> 
             <Text style={styles.codeLabel}>Ticket Code</Text>
             <Text style={styles.codeValue}>
               {item.ticketCode}
@@ -117,7 +134,7 @@ const MyTicketsScreen = ({ navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#ffffff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Tickets</Text>
         <View style={{ width: 24 }} />
@@ -133,7 +150,12 @@ const MyTicketsScreen = ({ navigation }) => {
         </View>
       ) : error ? (
         <View style={styles.centerContainer}>
-          <Text style={styles.emptyIcon}>⚠️</Text>
+          <Ionicons
+            name="warning"
+            size={56}
+            color="#CE1126"
+            style={{ marginBottom: 16 }}
+          />
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity
             style={styles.retryButton}
@@ -144,7 +166,12 @@ const MyTicketsScreen = ({ navigation }) => {
         </View>
       ) : tickets.length === 0 ? (
         <View style={styles.centerContainer}>
-          <Text style={styles.emptyIcon}>🎟️</Text>
+          <Ionicons
+            name="ticket-outline"
+            size={56}
+            color="#CCCCCC"
+            style={{ marginBottom: 16 }}
+          />
           <Text style={styles.emptyTitle}>No tickets yet</Text>
           <Text style={styles.emptySubtitle}>
             Tickets you purchase will appear here
@@ -184,10 +211,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  backArrow: {
-    fontSize: 24,
-    color: '#ffffff',
   },
   headerTitle: {
     fontSize: 18,
@@ -229,6 +252,9 @@ const styles = StyleSheet.create({
     color: '#1A1A1A',
   },
   statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     paddingHorizontal: 12,
     paddingVertical: 5,
     borderRadius: 12,
@@ -288,6 +314,13 @@ const styles = StyleSheet.create({
     padding: 14,
     alignItems: 'center',
   },
+  qrWrapper: {
+  backgroundColor: '#ffffff',
+  padding: 10,
+  borderRadius: 8,
+  marginBottom: 12,
+},
+
   codeLabel: {
     fontSize: 11,
     color: 'rgba(255,255,255,0.6)',
@@ -327,10 +360,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '600',
-  },
-  emptyIcon: {
-    fontSize: 56,
-    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 18,

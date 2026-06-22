@@ -5,10 +5,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
-  Dimensions,
+  Image,
 } from 'react-native';
-
-const { height } = Dimensions.get('window');
+import { Ionicons } from '@expo/vector-icons';
 
 const WelcomeScreen = ({ navigation }) => {
   return (
@@ -18,8 +17,14 @@ const WelcomeScreen = ({ navigation }) => {
       {/* Top Section — Green background with branding */}
       <View style={styles.topSection}>
 
-        {/* Star */}
-        <Text style={styles.star}>★</Text>
+        {/* Logo */}
+        <View style={styles.logoContainer}>
+          <Image
+            source={require('../../../assets/icon.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+        </View>
 
         {/* App name */}
         <Text style={styles.appName}>VisitGhana</Text>
@@ -32,15 +37,21 @@ const WelcomeScreen = ({ navigation }) => {
         {/* Three small feature hints */}
         <View style={styles.featuresRow}>
           <View style={styles.featureItem}>
-            <Text style={styles.featureIcon}>🏛️</Text>
+            <View style={styles.featureIconCircle}>
+              <Ionicons name="business" size={22} color="#FCD116" />
+            </View>
             <Text style={styles.featureText}>Explore Sites</Text>
           </View>
           <View style={styles.featureItem}>
-            <Text style={styles.featureIcon}>🗺️</Text>
+            <View style={styles.featureIconCircle}>
+              <Ionicons name="map" size={22} color="#FCD116" />
+            </View>
             <Text style={styles.featureText}>Navigate</Text>
           </View>
           <View style={styles.featureItem}>
-            <Text style={styles.featureIcon}>📸</Text>
+            <View style={styles.featureIconCircle}>
+              <Ionicons name="camera" size={22} color="#FCD116" />
+            </View>
             <Text style={styles.featureText}>Share Photos</Text>
           </View>
         </View>
@@ -89,8 +100,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#006B3F',
   },
-
-  // ── Top Section ────────────────────────────────
   topSection: {
     flex: 0.58,
     justifyContent: 'center',
@@ -98,10 +107,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingTop: 40,
   },
-  star: {
-    fontSize: 44,
-    color: '#000000',
-    marginBottom: 12,
+  logoContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 26,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 18,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  logo: {
+    width: 72,
+    height: 72,
   },
   appName: {
     fontSize: 44,
@@ -128,9 +150,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flex: 1,
   },
-  featureIcon: {
-    fontSize: 28,
-    marginBottom: 6,
+  featureIconCircle: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 8,
   },
   featureText: {
     fontSize: 12,
@@ -138,8 +165,6 @@ const styles = StyleSheet.create({
     opacity: 0.85,
     fontWeight: '500',
   },
-
-  // ── Bottom Section ─────────────────────────────
   bottomSection: {
     flex: 0.42,
     backgroundColor: '#ffffff',

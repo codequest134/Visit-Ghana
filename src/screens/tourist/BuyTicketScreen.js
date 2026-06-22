@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -40,13 +41,13 @@ const BuyTicketScreen = ({ route, navigation }) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: 1, // for now hardcoded — later from logged-in user
+          userId: 1,
           siteId: site.siteId,
           siteName: site.name,
           adults: adults,
           children: children,
           totalAmount: totalAmount,
-          email: 'tourist@example.com', // later from user
+          email: 'tourist@example.com',
         }),
       });
 
@@ -76,7 +77,7 @@ const BuyTicketScreen = ({ route, navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#ffffff" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Buy Tickets</Text>
         <View style={{ width: 24 }} />
@@ -88,7 +89,14 @@ const BuyTicketScreen = ({ route, navigation }) => {
         <View style={[styles.siteCard,
           { backgroundColor: site.color || '#1A4A6B' }]}>
           <Text style={styles.siteName}>{site.name}</Text>
-          <Text style={styles.siteRegion}>📍 {site.region}</Text>
+          <View style={styles.siteRegionRow}>
+            <Ionicons
+              name="location-sharp"
+              size={14}
+              color="rgba(255,255,255,0.85)"
+            />
+            <Text style={styles.siteRegion}>{site.region}</Text>
+          </View>
         </View>
 
         {/* Adult Tickets */}
@@ -105,14 +113,14 @@ const BuyTicketScreen = ({ route, navigation }) => {
               onPress={() =>
                 setAdults(Math.max(0, adults - 1))}
             >
-              <Text style={styles.counterBtnText}>−</Text>
+              <Ionicons name="remove" size={20} color="#006B3F" />
             </TouchableOpacity>
             <Text style={styles.counterValue}>{adults}</Text>
             <TouchableOpacity
               style={styles.counterBtn}
               onPress={() => setAdults(adults + 1)}
             >
-              <Text style={styles.counterBtnText}>+</Text>
+              <Ionicons name="add" size={20} color="#006B3F" />
             </TouchableOpacity>
           </View>
         </View>
@@ -131,14 +139,14 @@ const BuyTicketScreen = ({ route, navigation }) => {
               onPress={() =>
                 setChildren(Math.max(0, children - 1))}
             >
-              <Text style={styles.counterBtnText}>−</Text>
+              <Ionicons name="remove" size={20} color="#006B3F" />
             </TouchableOpacity>
             <Text style={styles.counterValue}>{children}</Text>
             <TouchableOpacity
               style={styles.counterBtn}
               onPress={() => setChildren(children + 1)}
             >
-              <Text style={styles.counterBtnText}>+</Text>
+              <Ionicons name="add" size={20} color="#006B3F" />
             </TouchableOpacity>
           </View>
         </View>
@@ -171,9 +179,12 @@ const BuyTicketScreen = ({ route, navigation }) => {
           </View>
         </View>
 
-        <Text style={styles.testNote}>
-          🔒 Test mode — use Paystack test card 4084 0840 8408 4081
-        </Text>
+        <View style={styles.testNoteRow}>
+          <Ionicons name="lock-closed" size={14} color="#888888" />
+          <Text style={styles.testNote}>
+            Test mode — use Paystack test card 4084 0840 8408 4081
+          </Text>
+        </View>
 
       </ScrollView>
 
@@ -210,7 +221,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  backArrow: { fontSize: 24, color: '#ffffff' },
   headerTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -227,6 +237,11 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#ffffff',
     marginBottom: 6,
+  },
+  siteRegionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   siteRegion: {
     fontSize: 14,
@@ -266,11 +281,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#006B3F',
-  },
-  counterBtnText: {
-    fontSize: 20,
-    color: '#006B3F',
-    fontWeight: 'bold',
   },
   counterValue: {
     fontSize: 18,
@@ -313,11 +323,16 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#006B3F',
   },
+  testNoteRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 20,
+  },
   testNote: {
     fontSize: 12,
     color: '#888888',
-    textAlign: 'center',
-    marginTop: 20,
   },
   footer: {
     padding: 20,
