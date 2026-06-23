@@ -31,6 +31,49 @@ const RECENT_PHOTOS = [
   { id: '4', site: 'Elmina Castle',       uploader: 'Abena T.', color: '#6B1A1A' },
 ];
 
+const FESTIVALS = [
+  {
+    id: '1',
+    name: 'Homowo Festival',
+    day: '24',
+    month: 'AUG',
+    fullDate: '24 August 2025',
+    location: 'Greater Accra Region',
+    duration: '1 Day',
+    category: 'Cultural',
+    color: '#006B3F',
+    description:
+      'Homowo is a harvest festival celebrated by the Ga people of Greater Accra. The name means "hooting at hunger" and commemorates a time when the Ga people overcame a great famine. It is one of the most vibrant and meaningful celebrations in Ghana, marked by the sprinkling of kpokpoi (a traditional festival food) and joyful processions through the streets.',
+    highlights: [
+      'Traditional kpokpoi food sharing',
+      'Colorful street processions and drumming',
+      'Twin celebrations and family reunions',
+      'Traditional Ga durbar of chiefs',
+    ],
+    tip: 'Arrive early in the morning to witness the traditional rituals. Dress respectfully and ask permission before taking photos of the chiefs.',
+  },
+  {
+    id: '2',
+    name: 'Chale Wote Festival',
+    day: '12',
+    month: 'SEP',
+    fullDate: '12 September 2025',
+    location: 'Accra, James Town',
+    duration: '1 Week',
+    category: 'Arts',
+    color: '#1A4A6B',
+    description:
+      'Chale Wote Street Art Festival is an annual alternative arts festival that takes place in the historic James Town district of Accra. It brings together painting, graffiti, photography, music, dance, street performances, and fashion. The festival transforms the streets into an open-air gallery and is a celebration of African creativity and urban culture.',
+    highlights: [
+      'Live street art and graffiti murals',
+      'Music performances and DJ sets',
+      'Fashion shows and art installations',
+      'Food vendors and local craft markets',
+    ],
+    tip: 'Wear comfortable shoes as you will be walking a lot. Bring cash for the food stalls and local art you may want to buy.',
+  },
+];
+
 const HomeScreen = ({ navigation }) => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [featuredSites, setFeaturedSites]   = useState([]);
@@ -240,18 +283,22 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.sectionTitle}>
               Upcoming Events
             </Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
           </View>
+           {FESTIVALS.map((festival) => (
+            <TouchableOpacity
+              key={festival.id}
+              style={styles.eventCard}
+              onPress={() => navigation.navigate('FestivalDetail',
+                { festival })}
+            >
 
-          <TouchableOpacity style={styles.eventCard}>
-            <View style={styles.eventDate}>
-              <Text style={styles.eventDay}>24</Text>
-              <Text style={styles.eventMonth}>AUG</Text>
-            </View>
-            <View style={styles.eventInfo}>
-              <Text style={styles.eventName}>Homowo Festival</Text>
+             <View style={[styles.eventDate, 
+              { backgroundColor: festival.color}]}>
+              <Text style={styles.eventDay}>{festival.day}</Text>
+              <Text style={styles.eventMonth}>{festival.month}</Text>
+             </View>   
+             <View style={styles.eventInfo}>
+              <Text style={styles.eventName}>{festival.name}</Text>
               <View style={styles.eventLocationRow}>
                 <Ionicons
                   name="location-sharp"
@@ -259,47 +306,19 @@ const HomeScreen = ({ navigation }) => {
                   color="#888888"
                 />
                 <Text style={styles.eventLocation}>
-                  Greater Accra Region
+                  {festival.location}
                 </Text>
               </View>
               <View style={styles.eventBadge}>
-                <Text style={styles.eventBadgeText}>Cultural</Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={22} color="#CCCCCC" />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.eventCard}>
-            <View style={[styles.eventDate,
-              { backgroundColor: '#1A4A6B' }]}>
-              <Text style={styles.eventDay}>12</Text>
-              <Text style={styles.eventMonth}>SEP</Text>
-            </View>
-            <View style={styles.eventInfo}>
-              <Text style={styles.eventName}>
-                Chale Wote Festival
-              </Text>
-              <View style={styles.eventLocationRow}>
-                <Ionicons
-                  name="location-sharp"
-                  size={12}
-                  color="#888888"
-                />
-                <Text style={styles.eventLocation}>
-                  Accra, James Town
-                </Text>
-              </View>
-              <View style={[styles.eventBadge,
-                { backgroundColor: '#E3F0FF' }]}>
-                <Text style={[styles.eventBadgeText,
-                  { color: '#1A4A6B' }]}>
-                  Arts
+                <Text style={styles.eventBadgeText}>
+                  {festival.category}
                 </Text>
               </View>
             </View>
             <Ionicons name="chevron-forward" size={22} color="#CCCCCC" />
           </TouchableOpacity>
-
+       ))}
+       
         </View>
 
         <View style={{ height: 100 }} />

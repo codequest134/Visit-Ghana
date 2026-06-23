@@ -10,28 +10,32 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../../components/BottomNav';
+import { getCurrentUser, clearCurrentUser } from '../../utils/currentUser';
 
 const ProfileScreen = ({ navigation }) => {
 
-  // Dummy user data
-  const user = {
-    name: 'Kwame Mensah',
-    email: 'kwame@example.com',
-    role: 'Tourist',
-    joinDate: 'June 2025',
-    photosUploaded: 8,
-    sitesVisited: 12,
-    reviewsWritten: 5,
-    badges: [
-      { id: '1', icon: 'walk',          label: 'Explorer',     earned: true  },
-      { id: '2', icon: 'camera',        label: 'Photographer', earned: true  },
-      { id: '3', icon: 'compass',       label: 'Trailblazer',  earned: false },
-      { id: '4', icon: 'business',      label: 'Historian',    earned: false },
-      { id: '5', icon: 'star',          label: 'Critic',       earned: true  },
-      { id: '6', icon: 'map',           label: 'Navigator',    earned: false },
-    ],
-  };
+  // Get the real logged-in user
+  const loggedInUser = getCurrentUser();
 
+   const user = {
+   name: loggedInUser?.fullName || 'Guest User',
+   email: loggedInUser?.email || 'guest@example.com',
+   role: loggedInUser?.role
+    ? loggedInUser.role.charAt(0).toUpperCase() + loggedInUser.role.slice(1)
+    : 'Tourist',
+   joinDate: 'June 2025',
+   photosUploaded: 8,
+   sitesVisited: 12,
+   reviewsWritten: 5,
+   badges: [
+    { id: '1', icon: 'walk',          label: 'Explorer',     earned: true  },
+    { id: '2', icon: 'camera',        label: 'Photographer', earned: true  },
+    { id: '3', icon: 'compass',       label: 'Trailblazer',  earned: false },
+    { id: '4', icon: 'business',      label: 'Historian',    earned: false },
+    { id: '5', icon: 'star',          label: 'Critic',       earned: true  },
+    { id: '6', icon: 'map',           label: 'Navigator',    earned: false },
+  ],
+ };
   const showComingSoon = (feature) => {
     Alert.alert(
       feature,
@@ -49,7 +53,10 @@ const ProfileScreen = ({ navigation }) => {
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => navigation.replace('Welcome'),
+          onPress: () => {
+            clearCurrentUser();
+            navigation.replace('Welcome');
+          },
         },
       ]
     );
@@ -284,6 +291,22 @@ const ProfileScreen = ({ navigation }) => {
               />
               <Text style={styles.settingLabel}>My Tickets</Text>
               <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
+            </TouchableOpacity>
+
+            <View style={styles.settingDivider} />
+            
+            <TouchableOpacity
+              style={styles.settingItem}
+              onPress={() => navigation.navigate('MyTrips')}
+            >
+              <Ionicons
+                name="calendar-outline"
+                size={20}
+                color="#006B3F"
+                style={styles.settingIcon}
+              />
+             <Text style={styles.settingLabel}>My Trips</Text>
+             <Ionicons name="chevron-forward" size={20} color="#CCCCCC" />
             </TouchableOpacity>
 
             <View style={styles.settingDivider} />

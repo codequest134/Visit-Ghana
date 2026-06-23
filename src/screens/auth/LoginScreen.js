@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { setCurrentUser } from '../../utils/currentUser';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -51,6 +52,7 @@ const LoginScreen = ({ navigation }) => {
 
       if (response.ok) {
         const data = await response.json();
+        setCurrentUser(data);
         navigation.replace('Home');
       } else {
         setError('Invalid email or password');

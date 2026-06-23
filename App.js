@@ -17,6 +17,8 @@ import PaymentScreen from './src/screens/tourist/PaymentScreen';
 import TicketSuccessScreen from './src/screens/tourist/TicketSuccessScreen';
 import MyTicketsScreen from './src/screens/tourist/MyTicketsScreen';
 import VirtualTourScreen from './src/screens/tourist/VirtualTourScreen';
+import MyTripsScreen from './src/screens/tourist/MyTripsScreen';
+import FestivalDetailScreen from './src/screens/tourist/FestivalDetailScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +44,8 @@ export default function App() {
         <Stack.Screen name="TicketSuccess" component={TicketSuccessScreen} />
         <Stack.Screen name="MyTickets" component={MyTicketsScreen} />
         <Stack.Screen name="VirtualTour" component={VirtualTourScreen} />
+        <Stack.Screen name="MyTrips" component={MyTripsScreen} />
+        <Stack.Screen name="FestivalDetail" component={FestivalDetailScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

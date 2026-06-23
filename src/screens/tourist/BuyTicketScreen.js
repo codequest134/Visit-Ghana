@@ -10,6 +10,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { getCurrentUser } from '../../utils/currentUser';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -36,21 +37,21 @@ const BuyTicketScreen = ({ route, navigation }) => {
     setLoading(true);
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/payments/initialize`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: 1,
-          siteId: site.siteId,
-          siteName: site.name,
-          adults: adults,
-          children: children,
-          totalAmount: totalAmount,
-          email: 'tourist@example.com',
-        }),
-      });
-
+      const user = await getCurrentUser();
+        const response = await fetch(
+          `${BASE_URL}/payments/initialize`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+             body: JSON.stringify({
+               userId: user?.userId || 1,
+               siteId: site.siteId, 
+               siteName: site.name, 
+               adults: adults,
+               children: children,
+               totalAmount: totalAmount,
+               email: user?.email || 'tourist@example.com',
+              }),
+          });  
       if (response.ok) {
         const data = await response.json();
         navigation.navigate('Payment', {

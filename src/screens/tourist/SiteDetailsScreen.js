@@ -9,8 +9,14 @@ import {
   Linking,
   Image,
   ActivityIndicator,
+  Share,
+  Alert,
+  Platform,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { getCurrentUser } from '../../utils/currentUser';
 
 // backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -21,6 +27,9 @@ const SiteDetailScreen = ({ route, navigation }) => {
   const [saved, setSaved] = useState(false);
   const [photos, setPhotos] = useState([]);
   const [photosLoading, setPhotosLoading] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [savingTrip, setSavingTrip] = useState(false);
+  const [tempDate, setTempDate] = useState(new Date());
 
   const TABS = ['About', 'History', 'Photos', 'Reviews'];
 
@@ -49,6 +58,73 @@ const SiteDetailScreen = ({ route, navigation }) => {
     const url =
       `https://www.google.com/maps/dir/?api=1&destination=${site.latitude},${site.longitude}`;
     Linking.openURL(url);
+  };
+
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message:
+          `Check out ${site.name} in ${site.region}, Ghana! ` +
+          `${site.description} ` +
+          `Discover it on the VisitGhana app.`,
+      });
+    } catch (err) {
+      Alert.alert('Error', 'Could not share this site.');
+    }
+  };
+
+  // Called as the user scrolls the spinner — just track the chosen date
+  const onDateChange = (event, selectedDate) => {
+    if (selectedDate) {
+      setTempDate(selectedDate);
+    }
+  };
+
+  // Called when the user taps Confirm — close the modal and save
+  const confirmDate = () => {
+    setShowDatePicker(false);
+    const formattedDate = tempDate.toISOString().split('T')[0];
+    saveTrip(formattedDate);
+  };
+
+  const saveTrip = async (visitDate) => {
+    setSavingTrip(true);
+    try {
+      const user = getCurrentUser();
+      const userId = user?.userId || 1;
+      const response = await fetch(`${BASE_URL}/trips/add`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userId,
+          siteId: site.siteId,
+          siteName: site.name,
+          siteRegion: site.region,
+          siteColor: site.color,
+          visitDate: visitDate,
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert(
+          'Trip Planned!',
+          `${site.name} has been added to your trips for ${visitDate}.`,
+          [
+            { text: 'OK' },
+            {
+              text: 'View My Trips',
+              onPress: () => navigation.navigate('MyTrips'),
+            },
+          ]
+        );
+      } else {
+        Alert.alert('Error', 'Could not save your trip. Please try again.');
+      }
+    } catch (err) {
+      Alert.alert('Connection Error', 'Check your network and try again.');
+    } finally {
+      setSavingTrip(false);
+    }
   };
 
   // Dummy reviews
@@ -481,11 +557,17 @@ const SiteDetailScreen = ({ route, navigation }) => {
             <Ionicons name="ticket-outline" size={24} color="#006B3F" />
             <Text style={styles.actionBtnText}>Buy Ticket</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={handleShare}
+          >
             <Ionicons name="share-social-outline" size={24} color="#006B3F" />
             <Text style={styles.actionBtnText}>Share</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.actionBtn}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => setShowDatePicker(true)}
+          >
             <Ionicons name="calendar-outline" size={24} color="#006B3F" />
             <Text style={styles.actionBtnText}>Plan Trip</Text>
           </TouchableOpacity>
@@ -515,9 +597,63 @@ const SiteDetailScreen = ({ route, navigation }) => {
 
         <View style={{ height: 40 }} />
       </ScrollView>
+
+      {/* Date Picker Modal */}
+      <Modal
+        visible={showDatePicker}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowDatePicker(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>
+                Pick a Visit Date
+              </Text>
+              <Text style={styles.modalSubtitle}>
+                When would you like to visit {site.name}?
+              </Text>
+            </View>
+
+            <DateTimePicker
+              value={tempDate}
+              mode="date"
+              display="spinner"
+              minimumDate={new Date()}
+              onChange={onDateChange}
+              style={styles.picker}
+              textColor="#1A1A1A"
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowDatePicker(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalConfirmBtn}
+                onPress={confirmDate}
+                disabled={savingTrip}
+              >
+                {savingTrip ? (
+                  <ActivityIndicator color="#ffffff" size="small" />
+                ) : (
+                  <Text style={styles.modalConfirmText}>
+                    Confirm
+                  </Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
@@ -527,6 +663,67 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: 'space-between',
     paddingBottom: 24,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingTop: 24,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+  },
+  modalHeader: {
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1A1A1A',
+    marginBottom: 6,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#888888',
+    textAlign: 'center',
+  },
+  picker: {
+    height: 180,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+  },
+  modalCancelBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#E0E0E0',
+    alignItems: 'center',
+  },
+  modalCancelText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#555555',
+  },
+  modalConfirmBtn: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 12,
+    backgroundColor: '#006B3F',
+    alignItems: 'center',
+  },
+  modalConfirmText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#ffffff',
   },
   heroButtons: {
     flexDirection: 'row',

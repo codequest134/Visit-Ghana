@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import QRCode from 'react-native-qrcode-svg';
+import { getCurrentUser } from '../../utils/currentUser';
 
 // ⬇️ Your backend address
 const BASE_URL = 'http://192.168.100.4:8081/api';
@@ -20,7 +21,8 @@ const MyTicketsScreen = ({ navigation }) => {
   const [error, setError]     = useState(null);
 
   // For now userId is hardcoded as 1
-  const userId = 1;
+  const user=getCurrentUser();
+  const userId = user?.userId || 1;
 
   useEffect(() => {
     loadTickets();
