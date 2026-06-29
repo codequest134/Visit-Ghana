@@ -30,6 +30,8 @@ const SiteDetailScreen = ({ route, navigation }) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [savingTrip, setSavingTrip] = useState(false);
   const [tempDate, setTempDate] = useState(new Date());
+  const [restaurants, setRestaurants] = useState([]);
+  const [restaurantsLoading, setRestaurantsLoading] = useState(false);
 
   const TABS = ['About', 'History', 'Photos', 'Reviews'];
 
@@ -38,6 +40,25 @@ const SiteDetailScreen = ({ route, navigation }) => {
       loadPhotos();
     }
   }, [activeTab]);
+
+  useEffect(() => {
+   loadRestaurants();
+  }, []);
+
+  const loadRestaurants = async () => {
+  try {
+    setRestaurantsLoading(true);
+    const response = await fetch(
+      `${BASE_URL}/restaurants/site/${site.siteId}`
+    );
+    const data = await response.json();
+    setRestaurants(data);
+  } catch (err) {
+    console.error('Error loading restaurants:', err);
+  } finally {
+    setRestaurantsLoading(false);
+  }
+ };
 
   const loadPhotos = async () => {
     try {
@@ -155,14 +176,6 @@ const SiteDetailScreen = ({ route, navigation }) => {
     },
   ];
 
-  // Dummy nearby places
-  const NEARBY = [
-    { id: '1', name: 'Elmina Bay Hotel',  type: 'Hotel',      distance: '1.2 km' },
-    { id: '2', name: 'Baobab Restaurant', type: 'Restaurant', distance: '0.8 km' },
-    { id: '3', name: 'Cape View Lodge',   type: 'Hotel',      distance: '2.1 km' },
-    { id: '4', name: 'The Fish Pot',      type: 'Restaurant', distance: '1.5 km' },
-  ];
-
   // ── Tab content renderer ──────────────────────
   const renderTabContent = () => {
     switch (activeTab) {
@@ -235,30 +248,55 @@ const SiteDetailScreen = ({ route, navigation }) => {
             </TouchableOpacity>
 
             {/* Nearby Section */}
-            <Text style={styles.tabSectionTitle}>
-              Nearby Hotels & Restaurants
-            </Text>
-            {NEARBY.map((place) => (
-              <View key={place.id} style={styles.nearbyCard}>
-                <View style={[styles.nearbyIcon, {
-                  backgroundColor: place.type === 'Hotel'
-                    ? '#E8F5EE' : '#FFF3E0',
-                }]}>
-                  <Ionicons
-                    name={place.type === 'Hotel' ? 'bed-outline' : 'restaurant-outline'}
-                    size={20}
-                    color={place.type === 'Hotel' ? '#006B3F' : '#E65100'}
-                  />
-                </View>
-                <View style={styles.nearbyInfo}>
-                  <Text style={styles.nearbyName}>{place.name}</Text>
-                  <Text style={styles.nearbyType}>{place.type}</Text>
-                </View>
-                <Text style={styles.nearbyDistance}>
-                  {place.distance}
-                </Text>
-              </View>
-            ))}
+            {/* Nearby Restaurants Section */}
+<Text style={styles.tabSectionTitle}>
+  Nearby Restaurants
+</Text>
+
+{restaurantsLoading ? (
+  <ActivityIndicator
+    size="small"
+    color="#006B3F"
+    style={{ marginVertical: 20 }}
+  />
+) : restaurants.length === 0 ? (
+  <Text style={styles.noRestaurantsText}>
+    No restaurants listed near this site yet.
+  </Text>
+) : (
+  restaurants.map((place) => (
+    <View key={place.restaurantId} style={styles.nearbyCard}>
+      <View style={[styles.nearbyIcon, {
+        backgroundColor: place.type === 'Cafe'
+          ? '#FFF8E1' : '#FFF3E0',
+      }]}>
+        <Ionicons
+          name={place.type === 'Cafe' ? 'cafe-outline' : 'restaurant-outline'}
+          size={20}
+          color="#E65100"
+        />
+      </View>
+      <View style={styles.nearbyInfo}>
+        <Text style={styles.nearbyName}>{place.name}</Text>
+        <Text style={styles.nearbyType}>
+          {place.cuisine}
+        </Text>
+        <View style={styles.restaurantMetaRow}>
+          <Ionicons name="star" size={12} color="#FCD116" />
+          <Text style={styles.restaurantRating}>
+            {place.rating}
+          </Text>
+          <Text style={styles.restaurantPrice}>
+            · {place.priceRange}
+          </Text>
+        </View>
+      </View>
+      <Text style={styles.nearbyDistance}>
+        {place.distance}
+      </Text>
+    </View>
+  ))
+ )}
           </View>
         );
 
@@ -947,6 +985,27 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#006B3F',
     fontWeight: '600',
+  },
+  noRestaurantsText: {
+    fontSize: 13,
+    color: '#888888',
+    fontStyle: 'italic',
+    marginBottom: 12,
+  },
+  restaurantMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    marginTop: 3,
+  },
+  restaurantRating: {
+    fontSize: 12,
+    color: '#1A1A1A',
+    fontWeight: '600',
+  },
+  restaurantPrice: {
+    fontSize: 12,
+    color: '#888888',
   },
   photosHeader: {
     flexDirection: 'row',

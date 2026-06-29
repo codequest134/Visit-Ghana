@@ -24,13 +24,15 @@ const FILTERS = [
 
 const MapScreen = ({ navigation }) => {
   const [sites, setSites]               = useState([]);
+  const [restaurants, setRestaurants]   = useState([]);
   const [loading, setLoading]           = useState(true);
   const [location, setLocation]         = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
-  const [selectedSite, setSelectedSite] = useState(null);
+  const [showRestaurants, setShowRestaurants] = useState(true);
 
   useEffect(() => {
     loadSites();
+    loadRestaurants();
     getLocation();
   }, []);
 
@@ -44,6 +46,16 @@ const MapScreen = ({ navigation }) => {
       console.error('Error loading sites:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadRestaurants = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/restaurants`);
+      const data = await response.json();
+      setRestaurants(data);
+    } catch (err) {
+      console.error('Error loading restaurants:', err);
     }
   };
 
@@ -83,7 +95,7 @@ const MapScreen = ({ navigation }) => {
         <View>
           <Text style={styles.headerTitle}>Map & Navigation</Text>
           <Text style={styles.headerSubtitle}>
-            {filteredSites.length} sites across Ghana
+            {filteredSites.length} sites · {restaurants.length} restaurants
           </Text>
         </View>
       </View>
@@ -131,9 +143,10 @@ const MapScreen = ({ navigation }) => {
             showsMyLocationButton={true}
             mapPadding={{ bottom: 80, top: 0, left: 0, right: 0 }}
           >
+            {/* Tourist Site Markers */}
             {filteredSites.map((site) => (
               <Marker
-                key={site.siteId}
+                key={`site-${site.siteId}`}
                 coordinate={{
                   latitude: parseFloat(site.latitude),
                   longitude: parseFloat(site.longitude),
@@ -145,13 +158,45 @@ const MapScreen = ({ navigation }) => {
                   navigation.navigate('SiteDetail', { site })}
               />
             ))}
+
+            {/* Restaurant Markers (orange) */}
+            {showRestaurants && restaurants.map((restaurant) => (
+              <Marker
+                key={`restaurant-${restaurant.restaurantId}`}
+                coordinate={{
+                  latitude: parseFloat(restaurant.latitude),
+                  longitude: parseFloat(restaurant.longitude),
+                }}
+                title={restaurant.name}
+                description={`${restaurant.cuisine} · ${restaurant.priceRange}`}
+                pinColor="#E65100"
+              />
+            ))}
           </MapView>
 
-          {/* Site count badge over map */}
+          {/* Restaurant toggle button */}
+          <TouchableOpacity
+            style={styles.toggleButton}
+            onPress={() => setShowRestaurants(!showRestaurants)}
+          >
+            <Ionicons
+              name="restaurant"
+              size={18}
+              color={showRestaurants ? '#ffffff' : '#E65100'}
+            />
+            <Text style={[
+              styles.toggleText,
+              { color: showRestaurants ? '#ffffff' : '#E65100' },
+            ]}>
+              {showRestaurants ? 'Hide' : 'Show'} Restaurants
+            </Text>
+          </TouchableOpacity>
+
+          {/* Info badge */}
           <View style={styles.mapBadge}>
-            <Ionicons name="location-sharp" size={14} color="#ffffff" />
+            <Ionicons name="information-circle" size={14} color="#ffffff" />
             <Text style={styles.mapBadgeText}>
-              Tap a pin, then tap its name to view details
+              Green = Sites · Orange = Restaurants
             </Text>
           </View>
         </View>
@@ -230,6 +275,27 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  toggleButton: {
+    position: 'absolute',
+    bottom: 100,
+    right: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#E65100',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 24,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  toggleText: {
+    fontSize: 13,
+    fontWeight: '600',
   },
   mapBadge: {
     flexDirection: 'row',
