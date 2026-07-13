@@ -10,9 +10,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
-
-// ⬇️ Your backend address
-const BASE_URL = 'http://192.168.100.4:8081/api';
+import BASE_URL from '../../utils/api';
 
 const PaymentScreen = ({ route, navigation }) => {
   const { authUrl, reference } = route.params;

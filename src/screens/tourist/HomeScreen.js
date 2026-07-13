@@ -8,12 +8,13 @@ import {
   StatusBar,
   FlatList,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../../components/BottomNav';
 
 // ⬇️ Your backend address
-const BASE_URL = 'http://192.168.100.4:8081/api';
+const BASE_URL = 'https://visitghana-api.onrender.com/api';
 
 const CATEGORIES = [
   { id: '1', name: 'All' },
@@ -22,13 +23,6 @@ const CATEGORIES = [
   { id: '4', name: 'Beach' },
   { id: '5', name: 'Cultural' },
   { id: '6', name: 'Religious' },
-];
-
-const RECENT_PHOTOS = [
-  { id: '1', site: 'Cape Coast Castle',   uploader: 'Kwame A.', color: '#1A4A6B' },
-  { id: '2', site: 'Kakum National Park', uploader: 'Ama S.',   color: '#2D6A4F' },
-  { id: '3', site: 'Labadi Beach',        uploader: 'Kofi M.',  color: '#C0873F' },
-  { id: '4', site: 'Elmina Castle',       uploader: 'Abena T.', color: '#6B1A1A' },
 ];
 
 const FESTIVALS = [
@@ -193,35 +187,43 @@ const HomeScreen = ({ navigation }) => {
               keyExtractor={(item) => item.siteId.toString()}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={[styles.siteCard,
-                    { backgroundColor: item.color || '#1A4A6B' }]}
+                  style={styles.siteCard}
                   onPress={() => navigation.navigate('SiteDetail',
                     { site: item })}
                 >
-                  <View style={styles.categoryBadge}>
-                    <Text style={styles.categoryBadgeText}>
-                      {item.category}
-                    </Text>
-                  </View>
-                  <Text style={styles.siteName}>{item.name}</Text>
-                  <View style={styles.siteFooter}>
-                    <View style={styles.siteRegionRow}>
-                      <Ionicons
-                        name="location-sharp"
-                        size={12}
-                        color="rgba(255,255,255,0.85)"
-                      />
-                      <Text style={styles.siteRegion}>
-                        {item.region}
-                      </Text>
-                    </View>
-                    <View style={styles.ratingBadge}>
-                      <Ionicons name="star" size={11} color="#1A1A1A" />
-                      <Text style={styles.ratingText}>
-                        {item.rating}
-                      </Text>
-                    </View>
-                  </View>
+                   <ImageBackground
+                     source={{ uri: item.imageUrl }}
+                     style={[styles.siteCardBg,
+                      { backgroundColor: item.color || '#1A4A6B' }]}
+                     imageStyle={styles.siteCardImage}
+                    >
+                      <View style={styles.siteCardOverlay}>
+                        <View style={styles.categoryBadge}>
+                          <Text style={styles.categoryBadgeText}>
+                            {item.category}
+                          </Text>
+                        </View>
+                        <Text style={styles.siteName}>{item.name}</Text>
+                        <View style={styles.siteFooter}>
+                         <View style={styles.siteRegionRow}>
+                           <Ionicons
+                              name="location-sharp"
+                              size={12}
+                              color="rgba(255,255,255,0.85)"
+                            />
+                            <Text style={styles.siteRegion}>
+                              {item.region}
+                            </Text>
+                          </View>
+                          <View style={styles.ratingBadge}>
+                            <Ionicons name="star" size={11} color="#1A1A1A" />
+                            <Text style={styles.ratingText}>
+                              {item.rating}
+                            </Text>
+                          </View>
+                        </View>
+                      </View>  
+                    </ImageBackground>  
                 </TouchableOpacity>
               )}
             />
@@ -237,43 +239,12 @@ const HomeScreen = ({ navigation }) => {
             <Text style={styles.statLabel}>Tourist Sites</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>10K+</Text>
+            <Text style={styles.statNumber}>1K+</Text>
             <Text style={styles.statLabel}>Community Photos</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>16</Text>
             <Text style={styles.statLabel}>Regions</Text>
-          </View>
-        </View>
-
-        {/* ── Community Photos ── */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              Community Photos
-            </Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See All</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.photosGrid}>
-            {RECENT_PHOTOS.map((photo) => (
-              <TouchableOpacity
-                key={photo.id}
-                style={[styles.photoCard,
-                  { backgroundColor: photo.color }]}
-              >
-                <View style={styles.photoOverlay}>
-                  <Text style={styles.photoSite}>
-                    {photo.site}
-                  </Text>
-                  <Text style={styles.photoUploader}>
-                    by {photo.uploader}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            ))}
           </View>
         </View>
 
@@ -436,9 +407,20 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: 16,
     marginRight: 14,
-    padding: 16,
-    justifyContent: 'space-between',
+    overflow:'hidden',
   },
+  siteCardBg: {
+  flex: 1,
+},
+siteCardImage: {
+  resizeMode: 'cover',
+},
+siteCardOverlay: {
+  flex: 1,
+  padding: 16,
+  justifyContent: 'space-between',
+  backgroundColor: 'rgba(0,0,0,0.25)',
+},
   categoryBadge: {
     backgroundColor: 'rgba(255,255,255,0.25)',
     paddingHorizontal: 10,

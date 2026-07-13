@@ -14,9 +14,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import BottomNav from '../../components/BottomNav';
-
-// ⬇️ Your backend address
-const BASE_URL = 'http://192.168.100.4:8081/api';
+import BASE_URL from '../../utils/api';
 
 const UploadScreen = ({ route, navigation }) => {
   const site = route.params?.site || null;

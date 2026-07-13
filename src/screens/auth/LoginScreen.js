@@ -12,10 +12,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import BASE_URL from '../../utils/api';
 import { setCurrentUser } from '../../utils/currentUser';
-
-// ⬇️ Your backend address
-const BASE_URL = 'http://192.168.100.4:8081/api';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail]             = useState('');

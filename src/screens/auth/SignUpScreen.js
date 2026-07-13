@@ -12,10 +12,9 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import BASE_URL from '../../utils/api';
 import { setCurrentUser } from '../../utils/currentUser';
 
-// ⬇️ Your backend address
-const BASE_URL = 'http://192.168.100.4:8081/api';
 
 const SignUpScreen = ({ navigation }) => {
   const [fullName, setFullName]               = useState('');
@@ -54,6 +53,7 @@ const SignUpScreen = ({ navigation }) => {
     setLoading(true);
 
     try {
+      console.log('Calling:', `${BASE_URL}/auth/signup`);
       const response = await fetch(`${BASE_URL}/auth/signup`, {
         method: 'POST',
         headers: {

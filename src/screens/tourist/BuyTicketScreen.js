@@ -10,10 +10,9 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import BASE_URL from '../../utils/api';
 import { getCurrentUser } from '../../utils/currentUser';
 
-// ⬇️ Your backend address
-const BASE_URL = 'http://192.168.100.4:8081/api';
 
 const ADULT_PRICE = 40;   // GHS per adult
 const CHILD_PRICE = 20;   // GHS per child

@@ -10,10 +10,8 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import BASE_URL from '../../utils/api';
 import { getCurrentUser } from '../../utils/currentUser';
-
-// ⬇️ Your backend address
-const BASE_URL = 'http://192.168.100.4:8081/api';
 
 const MyTripsScreen = ({ navigation }) => {
   const [trips, setTrips]     = useState([]);

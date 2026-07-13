@@ -8,11 +8,11 @@ import {
   TextInput,
   StatusBar,
   ActivityIndicator,
+  ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../../components/BottomNav';
-
-const BASE_URL = 'http://192.168.100.4:8081/api';
+import BASE_URL from '../../utils/api';
 
 const FILTERS = [
   'All', 'Historical', 'Wildlife',
@@ -62,24 +62,30 @@ const SitesScreen = ({ navigation }) => {
       onPress={() =>
         navigation.navigate('SiteDetail', { site: item })}
     >
-      <View style={[styles.cardBanner,
-        { backgroundColor: item.color || '#1A4A6B' }]}>
-        {item.isVerified && (
-          <View style={styles.verifiedBadge}>
-            <Ionicons
-              name="checkmark-circle"
-              size={12}
-              color="#ffffff"
-            />
-            <Text style={styles.verifiedText}>Verified</Text>
-          </View>
-        )}
-        <View style={styles.categoryBadge}>
-          <Text style={styles.categoryBadgeText}>
-            {item.category}
-          </Text>
-        </View>
+     <ImageBackground
+  source={{ uri: item.imageUrl }}
+  style={[styles.cardBanner,
+    { backgroundColor: item.color || '#1A4A6B' }]}
+  imageStyle={styles.cardBannerImage}
+>
+  <View style={styles.bannerOverlay}>
+    {item.isVerified && (
+      <View style={styles.verifiedBadge}>
+        <Ionicons
+          name="checkmark-circle"
+          size={12}
+          color="#ffffff"
+        />
+        <Text style={styles.verifiedText}>Verified</Text>
       </View>
+    )}
+    <View style={styles.categoryBadge}>
+      <Text style={styles.categoryBadgeText}>
+        {item.category}
+      </Text>
+     </View>
+    </View>
+   </ImageBackground> 
 
       <View style={styles.cardContent}>
         <Text style={styles.siteName}>{item.name}</Text>
@@ -99,9 +105,6 @@ const SitesScreen = ({ navigation }) => {
           <View style={styles.ratingRow}>
             <Ionicons name="star" size={14} color="#FCD116" />
             <Text style={styles.ratingText}>{item.rating}</Text>
-            <Text style={styles.reviewCount}>
-              ({item.reviewCount} reviews)
-            </Text>
           </View>
           <TouchableOpacity
             style={styles.viewButton}
@@ -340,6 +343,19 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     padding: 12,
+  },
+  cardBannerImage: {
+    resizeMode: 'cover',
+  },
+  bannerOverlay: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(0,0,0,0.15)',
+    margin: -12,
+    padding: 12,
+    borderRadius: 0,
   },
   verifiedBadge: {
     flexDirection: 'row',

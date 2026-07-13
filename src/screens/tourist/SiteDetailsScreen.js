@@ -13,13 +13,15 @@ import {
   Alert,
   Platform,
   Modal,
+  Dimensions,
+  ImageBackground,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import BASE_URL from '../../utils/api';
 import { getCurrentUser } from '../../utils/currentUser';
 
-// backend address
-const BASE_URL = 'http://192.168.100.4:8081/api';
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 const SiteDetailScreen = ({ route, navigation }) => {
   const { site } = route.params;
@@ -32,8 +34,10 @@ const SiteDetailScreen = ({ route, navigation }) => {
   const [tempDate, setTempDate] = useState(new Date());
   const [restaurants, setRestaurants] = useState([]);
   const [restaurantsLoading, setRestaurantsLoading] = useState(false);
+  const [galleryPhotos, setGalleryPhotos] = useState([]);
+  const [activePhotoIndex, setActivePhotoIndex] = useState(0);
 
-  const TABS = ['About', 'History', 'Photos', 'Reviews'];
+  const TABS = ['About', 'History', 'Photos'];
 
   useEffect(() => {
     if (activeTab === 'Photos') {
@@ -42,23 +46,37 @@ const SiteDetailScreen = ({ route, navigation }) => {
   }, [activeTab]);
 
   useEffect(() => {
-   loadRestaurants();
+    loadGalleryPhotos();
+    loadRestaurants();
   }, []);
 
+  // Load the site's gallery photos (from site_photos table) for the hero carousel
+  const loadGalleryPhotos = async () => {
+    try {
+      const response = await fetch(
+        `${BASE_URL}/site-photos/${site.siteId}`
+      );
+      const data = await response.json();
+      setGalleryPhotos(data);
+    } catch (err) {
+      console.error('Error loading gallery photos:', err);
+    }
+  };
+
   const loadRestaurants = async () => {
-  try {
-    setRestaurantsLoading(true);
-    const response = await fetch(
-      `${BASE_URL}/restaurants/site/${site.siteId}`
-    );
-    const data = await response.json();
-    setRestaurants(data);
-  } catch (err) {
-    console.error('Error loading restaurants:', err);
-  } finally {
-    setRestaurantsLoading(false);
-  }
- };
+    try {
+      setRestaurantsLoading(true);
+      const response = await fetch(
+        `${BASE_URL}/restaurants/site/${site.siteId}`
+      );
+      const data = await response.json();
+      setRestaurants(data);
+    } catch (err) {
+      console.error('Error loading restaurants:', err);
+    } finally {
+      setRestaurantsLoading(false);
+    }
+  };
 
   const loadPhotos = async () => {
     try {
@@ -73,6 +91,14 @@ const SiteDetailScreen = ({ route, navigation }) => {
     } finally {
       setPhotosLoading(false);
     }
+  };
+
+  // Track which hero photo is showing as the user slides the carousel
+  const onPhotoScroll = (event) => {
+    const index = Math.round(
+      event.nativeEvent.contentOffset.x / SCREEN_WIDTH
+    );
+    setActivePhotoIndex(index);
   };
 
   const openDirections = () => {
@@ -148,34 +174,6 @@ const SiteDetailScreen = ({ route, navigation }) => {
     }
   };
 
-  // Dummy reviews
-  const REVIEWS = [
-    {
-      id: '1',
-      name: 'Kwame Asante',
-      rating: 5,
-      date: 'June 2025',
-      comment:
-        'Absolutely breathtaking experience. The history here is deeply moving and the guides are very knowledgeable.',
-    },
-    {
-      id: '2',
-      name: 'Sophie Lambert',
-      rating: 4,
-      date: 'May 2025',
-      comment:
-        'A must visit when in Ghana. The architecture is stunning and the story behind it is unforgettable.',
-    },
-    {
-      id: '3',
-      name: 'Ama Serwaa',
-      rating: 5,
-      date: 'April 2025',
-      comment:
-        'I have visited twice and each time it feels like a completely different experience. Highly recommended.',
-    },
-  ];
-
   // ── Tab content renderer ──────────────────────
   const renderTabContent = () => {
     switch (activeTab) {
@@ -186,26 +184,11 @@ const SiteDetailScreen = ({ route, navigation }) => {
           <View>
             <Text style={styles.tabSectionTitle}>Overview</Text>
             <Text style={styles.descriptionText}>
-              {site.description}{'\n\n'}
-              This remarkable site stands as a testament to Ghana's rich
-              and complex history. Visitors from around the world come
-              to experience its unique blend of architecture, culture,
-              and historical significance that cannot be found anywhere
-              else on the African continent.
+              {site.description}
             </Text>
 
             {/* Info cards */}
             <View style={styles.infoGrid}>
-              <View style={styles.infoCard}>
-                <Ionicons name="time-outline" size={24} color="#006B3F" />
-                <Text style={styles.infoLabel}>Opening Hours</Text>
-                <Text style={styles.infoValue}>8:00 AM – 5:00 PM</Text>
-              </View>
-              <View style={styles.infoCard}>
-                <Ionicons name="ticket-outline" size={24} color="#006B3F" />
-                <Text style={styles.infoLabel}>Entry Fee</Text>
-                <Text style={styles.infoValue}>GHS 40 / Adult</Text>
-              </View>
               <View style={styles.infoCard}>
                 <Ionicons name="location-outline" size={24} color="#006B3F" />
                 <Text style={styles.infoLabel}>Region</Text>
@@ -247,56 +230,55 @@ const SiteDetailScreen = ({ route, navigation }) => {
               <Ionicons name="chevron-forward" size={22} color="#FFA000" />
             </TouchableOpacity>
 
-            {/* Nearby Section */}
             {/* Nearby Restaurants Section */}
-<Text style={styles.tabSectionTitle}>
-  Nearby Restaurants
-</Text>
+            <Text style={styles.tabSectionTitle}>
+              Nearby Restaurants
+            </Text>
 
-{restaurantsLoading ? (
-  <ActivityIndicator
-    size="small"
-    color="#006B3F"
-    style={{ marginVertical: 20 }}
-  />
-) : restaurants.length === 0 ? (
-  <Text style={styles.noRestaurantsText}>
-    No restaurants listed near this site yet.
-  </Text>
-) : (
-  restaurants.map((place) => (
-    <View key={place.restaurantId} style={styles.nearbyCard}>
-      <View style={[styles.nearbyIcon, {
-        backgroundColor: place.type === 'Cafe'
-          ? '#FFF8E1' : '#FFF3E0',
-      }]}>
-        <Ionicons
-          name={place.type === 'Cafe' ? 'cafe-outline' : 'restaurant-outline'}
-          size={20}
-          color="#E65100"
-        />
-      </View>
-      <View style={styles.nearbyInfo}>
-        <Text style={styles.nearbyName}>{place.name}</Text>
-        <Text style={styles.nearbyType}>
-          {place.cuisine}
-        </Text>
-        <View style={styles.restaurantMetaRow}>
-          <Ionicons name="star" size={12} color="#FCD116" />
-          <Text style={styles.restaurantRating}>
-            {place.rating}
-          </Text>
-          <Text style={styles.restaurantPrice}>
-            · {place.priceRange}
-          </Text>
-        </View>
-      </View>
-      <Text style={styles.nearbyDistance}>
-        {place.distance}
-      </Text>
-    </View>
-  ))
- )}
+            {restaurantsLoading ? (
+              <ActivityIndicator
+                size="small"
+                color="#006B3F"
+                style={{ marginVertical: 20 }}
+              />
+            ) : restaurants.length === 0 ? (
+              <Text style={styles.noRestaurantsText}>
+                No restaurants listed near this site yet.
+              </Text>
+            ) : (
+              restaurants.map((place) => (
+                <View key={place.restaurantId} style={styles.nearbyCard}>
+                  <View style={[styles.nearbyIcon, {
+                    backgroundColor: place.type === 'Cafe'
+                      ? '#FFF8E1' : '#FFF3E0',
+                  }]}>
+                    <Ionicons
+                      name={place.type === 'Cafe' ? 'cafe-outline' : 'restaurant-outline'}
+                      size={20}
+                      color="#E65100"
+                    />
+                  </View>
+                  <View style={styles.nearbyInfo}>
+                    <Text style={styles.nearbyName}>{place.name}</Text>
+                    <Text style={styles.nearbyType}>
+                      {place.cuisine}
+                    </Text>
+                    <View style={styles.restaurantMetaRow}>
+                      <Ionicons name="star" size={12} color="#FCD116" />
+                      <Text style={styles.restaurantRating}>
+                        {place.rating}
+                      </Text>
+                      <Text style={styles.restaurantPrice}>
+                        · {place.priceRange}
+                      </Text>
+                    </View>
+                  </View>
+                  <Text style={styles.nearbyDistance}>
+                    {place.distance}
+                  </Text>
+                </View>
+              ))
+            )}
           </View>
         );
 
@@ -307,40 +289,15 @@ const SiteDetailScreen = ({ route, navigation }) => {
             <Text style={styles.tabSectionTitle}>
               Historical Background
             </Text>
-            <Text style={styles.descriptionText}>
-              {site.name} holds a profound place in the history of
-              Ghana and the African continent as a whole. Its origins
-              date back centuries, representing a convergence of
-              indigenous Ghanaian culture and the complex forces of
-              trade, colonialism, and resistance that shaped West
-              Africa.{'\n\n'}
-              The site was first established as a strategic location
-              due to its geographical advantages. Over the decades it
-              evolved into one of the most significant landmarks in
-              the region.{'\n\n'}
-              Today it stands as a symbol of Ghana's enduring spirit
-              and its people's ability to preserve their heritage
-              through generations of change.
-            </Text>
-
-            {/* Timeline */}
-            <Text style={styles.tabSectionTitle}>Timeline</Text>
-            {[
-              { year: '1482', event: 'Site first established' },
-              { year: '1700s', event: 'Expanded under new administration' },
-              { year: '1850', event: 'Transitioned to new purpose' },
-              { year: '1957', event: 'Ghana Independence — site preserved' },
-              { year: '1979', event: 'Declared UNESCO World Heritage Site' },
-              { year: '2024', event: 'Major restoration completed' },
-            ].map((item, index) => (
-              <View key={index} style={styles.timelineItem}>
-                <View style={styles.timelineDot} />
-                <View style={styles.timelineContent}>
-                  <Text style={styles.timelineYear}>{item.year}</Text>
-                  <Text style={styles.timelineEvent}>{item.event}</Text>
-                </View>
-              </View>
-            ))}
+            {site.history ? (
+              <Text style={styles.descriptionText}>
+                {site.history}
+              </Text>
+            ) : (
+              <Text style={styles.noHistoryText}>
+                Historical information for this site is coming soon.
+              </Text>
+            )}
           </View>
         );
 
@@ -424,91 +381,6 @@ const SiteDetailScreen = ({ route, navigation }) => {
           </View>
         );
 
-      // ── Reviews Tab ────────────────────────────
-      case 'Reviews':
-        return (
-          <View>
-            {/* Rating summary */}
-            <View style={styles.ratingSummary}>
-              <Text style={styles.bigRating}>{site.rating}</Text>
-              <View style={styles.ratingDetails}>
-                <View style={styles.starsRow}>
-                  {[1, 2, 3, 4, 5].map((n) => (
-                    <Ionicons
-                      key={n}
-                      name={n <= Math.round(site.rating) ? 'star' : 'star-outline'}
-                      size={18}
-                      color="#FCD116"
-                    />
-                  ))}
-                </View>
-                <Text style={styles.ratingSubtext}>
-                  Based on {site.reviewCount} reviews
-                </Text>
-              </View>
-            </View>
-
-            {/* Rating breakdown */}
-            {[
-              { label: 'History',       score: 4.9 },
-              { label: 'Scenery',       score: 4.7 },
-              { label: 'Accessibility', score: 4.2 },
-              { label: 'Value',         score: 4.5 },
-            ].map((item) => (
-              <View key={item.label} style={styles.ratingBar}>
-                <Text style={styles.ratingBarLabel}>
-                  {item.label}
-                </Text>
-                <View style={styles.ratingBarTrack}>
-                  <View style={[styles.ratingBarFill, {
-                    width: `${(item.score / 5) * 100}%`,
-                  }]} />
-                </View>
-                <Text style={styles.ratingBarScore}>
-                  {item.score}
-                </Text>
-              </View>
-            ))}
-
-            <Text style={styles.tabSectionTitle}>
-              Visitor Reviews
-            </Text>
-
-            {REVIEWS.map((review) => (
-              <View key={review.id} style={styles.reviewCard}>
-                <View style={styles.reviewHeader}>
-                  <View style={styles.reviewAvatar}>
-                    <Text style={styles.reviewAvatarText}>
-                      {review.name.charAt(0)}
-                    </Text>
-                  </View>
-                  <View style={styles.reviewMeta}>
-                    <Text style={styles.reviewName}>
-                      {review.name}
-                    </Text>
-                    <Text style={styles.reviewDate}>
-                      {review.date}
-                    </Text>
-                  </View>
-                  <View style={styles.reviewStarsRow}>
-                    {[...Array(review.rating)].map((_, i) => (
-                      <Ionicons
-                        key={i}
-                        name="star"
-                        size={14}
-                        color="#FCD116"
-                      />
-                    ))}
-                  </View>
-                </View>
-                <Text style={styles.reviewComment}>
-                  {review.comment}
-                </Text>
-              </View>
-            ))}
-          </View>
-        );
-
       default:
         return null;
     }
@@ -520,63 +392,109 @@ const SiteDetailScreen = ({ route, navigation }) => {
       <StatusBar barStyle="light-content" />
       <ScrollView showsVerticalScrollIndicator={false}>
 
-        {/* Hero Banner */}
-        <View style={[styles.heroBanner,
-          { backgroundColor: site.color }]}>
-          <View style={styles.heroButtons}>
-            <TouchableOpacity
-              style={styles.heroBtn}
-              onPress={() => navigation.goBack()}
+        {/* Hero Image Carousel */}
+        <View style={styles.heroBanner}>
+          {galleryPhotos.length > 0 ? (
+            <ScrollView
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={onPhotoScroll}
+              scrollEventThrottle={16}
             >
-              <Ionicons name="arrow-back" size={22} color="#ffffff" />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.heroBtn}
-              onPress={() => setSaved(!saved)}
+              {galleryPhotos.map((photo) => (
+                <ImageBackground
+                  key={photo.photoId}
+                  source={{ uri: photo.imageUrl }}
+                  style={[styles.heroSlide,
+                    { backgroundColor: site.color }]}
+                  imageStyle={styles.heroBannerImage}
+                >
+                  <View style={styles.heroSlideOverlay} />
+                </ImageBackground>
+              ))}
+            </ScrollView>
+          ) : (
+            // Fallback: single image or color while gallery loads
+            <ImageBackground
+              source={{ uri: site.imageUrl }}
+              style={[styles.heroSlide,
+                { backgroundColor: site.color }]}
+              imageStyle={styles.heroBannerImage}
             >
-              <Ionicons
-                name={saved ? 'heart' : 'heart-outline'}
-                size={22}
-                color={saved ? '#CE1126' : '#ffffff'}
-              />
-            </TouchableOpacity>
+              <View style={styles.heroSlideOverlay} />
+            </ImageBackground>
+          )}
+
+          {/* Overlaid controls and info (sit on top of carousel) */}
+          <View style={styles.heroOverlayContent} pointerEvents="box-none">
+            <View style={styles.heroButtons}>
+              <TouchableOpacity
+                style={styles.heroBtn}
+                onPress={() => navigation.goBack()}
+              >
+                <Ionicons name="arrow-back" size={22} color="#ffffff" />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.heroBtn}
+                onPress={() => setSaved(!saved)}
+              >
+                <Ionicons
+                  name={saved ? 'heart' : 'heart-outline'}
+                  size={22}
+                  color={saved ? '#CE1126' : '#ffffff'}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.heroContent}>
+              <View style={styles.heroBadgeRow}>
+                <View style={styles.heroCategoryBadge}>
+                  <Text style={styles.heroCategoryText}>
+                    {site.category}
+                  </Text>
+                </View>
+                <View style={styles.heroVerifiedBadge}>
+                  <Ionicons
+                    name="checkmark-circle"
+                    size={12}
+                    color="#FCD116"
+                  />
+                  <Text style={styles.heroVerifiedText}>
+                    Verified
+                  </Text>
+                </View>
+              </View>
+              <Text style={styles.heroSiteName}>{site.name}</Text>
+              <View style={styles.heroRegionRow}>
+                <Ionicons
+                  name="location-sharp"
+                  size={14}
+                  color="rgba(255,255,255,0.85)"
+                />
+                <Text style={styles.heroRegion}>{site.region}</Text>
+              </View>
+              <View style={styles.heroRatingRow}>
+                <Ionicons name="star" size={15} color="#FCD116" />
+                <Text style={styles.heroRating}>{site.rating}</Text>
+              </View>
+            </View>
           </View>
 
-          <View style={styles.heroContent}>
-            <View style={styles.heroBadgeRow}>
-              <View style={styles.heroCategoryBadge}>
-                <Text style={styles.heroCategoryText}>
-                  {site.category}
-                </Text>
-              </View>
-              <View style={styles.heroVerifiedBadge}>
-                <Ionicons
-                  name="checkmark-circle"
-                  size={12}
-                  color="#FCD116"
+          {/* Dots showing photo position */}
+          {galleryPhotos.length > 1 && (
+            <View style={styles.dotsContainer}>
+              {galleryPhotos.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.dot,
+                    activePhotoIndex === index && styles.dotActive,
+                  ]}
                 />
-                <Text style={styles.heroVerifiedText}>
-                  Verified
-                </Text>
-              </View>
+              ))}
             </View>
-            <Text style={styles.heroSiteName}>{site.name}</Text>
-            <View style={styles.heroRegionRow}>
-              <Ionicons
-                name="location-sharp"
-                size={14}
-                color="rgba(255,255,255,0.85)"
-              />
-              <Text style={styles.heroRegion}>{site.region}</Text>
-            </View>
-            <View style={styles.heroRatingRow}>
-              <Ionicons name="star" size={15} color="#FCD116" />
-              <Text style={styles.heroRating}>{site.rating}</Text>
-              <Text style={styles.heroReviews}>
-                ({site.reviewCount} reviews)
-              </Text>
-            </View>
-          </View>
+          )}
         </View>
 
         {/* Action Buttons */}
@@ -692,15 +610,49 @@ const SiteDetailScreen = ({ route, navigation }) => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F5F5F5' },
   heroBanner: {
     height: 280,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  heroSlide: {
+    width: SCREEN_WIDTH,
+    height: 280,
+  },
+  heroBannerImage: {
+    resizeMode: 'cover',
+  },
+  heroSlideOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.25)',
+  },
+  heroOverlayContent: {
+    ...StyleSheet.absoluteFillObject,
     paddingTop: 50,
     paddingHorizontal: 20,
-    justifyContent: 'space-between',
     paddingBottom: 24,
+    justifyContent: 'space-between',
+  },
+  dotsContainer: {
+    position: 'absolute',
+    bottom: 12,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  dotActive: {
+    width: 18,
+    backgroundColor: '#ffffff',
   },
   modalOverlay: {
     flex: 1,
@@ -890,6 +842,12 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 20,
   },
+  noHistoryText: {
+    fontSize: 14,
+    color: '#888888',
+    fontStyle: 'italic',
+    lineHeight: 22,
+  },
   infoGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -1077,118 +1035,6 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingHorizontal: 2,
   },
-  ratingSummary: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F8F8F8',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    gap: 16,
-  },
-  bigRating: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#006B3F',
-  },
-  ratingDetails: { flex: 1 },
-  starsRow: {
-    flexDirection: 'row',
-    gap: 2,
-    marginBottom: 4,
-  },
-  ratingSubtext: { fontSize: 12, color: '#888888' },
-  ratingBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    gap: 10,
-  },
-  ratingBarLabel: {
-    fontSize: 13,
-    color: '#555555',
-    width: 90,
-  },
-  ratingBarTrack: {
-    flex: 1,
-    height: 6,
-    backgroundColor: '#F0F0F0',
-    borderRadius: 3,
-  },
-  ratingBarFill: {
-    height: 6,
-    backgroundColor: '#006B3F',
-    borderRadius: 3,
-  },
-  ratingBarScore: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#1A1A1A',
-    width: 28,
-    textAlign: 'right',
-  },
-  reviewCard: {
-    backgroundColor: '#F8F8F8',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
-  },
-  reviewHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    gap: 10,
-  },
-  reviewAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: '#006B3F',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  reviewAvatarText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  reviewMeta: { flex: 1 },
-  reviewName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#1A1A1A',
-  },
-  reviewDate: { fontSize: 12, color: '#888888' },
-  reviewStarsRow: {
-    flexDirection: 'row',
-    gap: 1,
-  },
-  reviewComment: {
-    fontSize: 13,
-    color: '#555555',
-    lineHeight: 20,
-  },
-  timelineItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 16,
-    gap: 14,
-  },
-  timelineDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#006B3F',
-    marginTop: 4,
-  },
-  timelineContent: { flex: 1 },
-  timelineYear: {
-    fontSize: 13,
-    fontWeight: 'bold',
-    color: '#006B3F',
-    marginBottom: 2,
-  },
-  timelineEvent: { fontSize: 13, color: '#555555' },
 });
 
 export default SiteDetailScreen;
