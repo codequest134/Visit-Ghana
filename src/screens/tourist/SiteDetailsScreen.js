@@ -219,7 +219,10 @@ const SiteDetailScreen = ({ route, navigation }) => {
             </TouchableOpacity>
 
             {/* Audio Guide Button */}
-            <TouchableOpacity style={styles.audioButton}>
+            <TouchableOpacity 
+              style={styles.audioButton}
+              onPress={() => navigation.navigate('AudioGuide', { site })}
+            >
               <Ionicons name="headset-outline" size={24} color="#E65100" />
               <View style={styles.featureBtnTextWrap}>
                 <Text style={styles.audioTitle}>Audio Guide</Text>

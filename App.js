@@ -23,6 +23,7 @@ import HelpScreen from './src/screens/tourist/HelpScreen';
 import TermsScreen from './src/screens/tourist/TermsScreen';
 import EditProfileScreen from './src/screens/tourist/EditProfileScreen';
 import ChangePasswordScreen from './src/screens/tourist/ChangePasswordScreen';
+import AudioGuideScreen from './src/screens/tourist/AudioGuideScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +55,7 @@ export default function App() {
         <Stack.Screen name="Terms" component={TermsScreen} />
         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+        <Stack.Screen name="AudioGuide" component={AudioGuideScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

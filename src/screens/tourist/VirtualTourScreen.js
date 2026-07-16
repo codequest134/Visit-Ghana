@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { Ionicons } from '@expo/vector-icons';
 
 const VirtualTourScreen = ({ route, navigation }) => {
   const { site } = route.params;
@@ -47,7 +48,7 @@ const VirtualTourScreen = ({ route, navigation }) => {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.backArrow}>←</Text>
+          <Ionicons name="arrow-back" size={24} color="#ffffff" />
         </TouchableOpacity>
         <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>360° Virtual Tour</Text>
@@ -58,7 +59,7 @@ const VirtualTourScreen = ({ route, navigation }) => {
 
       {/* Info banner */}
       <View style={styles.infoBanner}>
-        <Text style={styles.infoIcon}>🌐</Text>
+        <Ionicons name="globe-outline" size={18} color="#006B3F" />
         <Text style={styles.infoText}>
           Drag to look around in 360° · Pinch to zoom
         </Text>
@@ -86,8 +87,9 @@ const VirtualTourScreen = ({ route, navigation }) => {
 
       {/* Bottom note */}
       <View style={styles.bottomNote}>
+        <Ionicons name="location-sharp" size={14} color="rgba(255,255,255,0.7)" />
         <Text style={styles.bottomNoteText}>
-          📍 {site.region} · Powered by Google Street View
+          {site.region} · Powered by Google Street View
         </Text>
       </View>
 
@@ -108,10 +110,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  backArrow: {
-    fontSize: 24,
-    color: '#ffffff',
   },
   headerCenter: {
     flex: 1,
@@ -134,9 +132,6 @@ const styles = StyleSheet.create({
     padding: 12,
     gap: 10,
   },
-  infoIcon: {
-    fontSize: 18,
-  },
   infoText: {
     flex: 1,
     fontSize: 12,
@@ -157,9 +152,12 @@ const styles = StyleSheet.create({
     color: '#888888',
   },
   bottomNote: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     backgroundColor: '#1A1A2E',
     padding: 12,
-    alignItems: 'center',
   },
   bottomNoteText: {
     fontSize: 12,
