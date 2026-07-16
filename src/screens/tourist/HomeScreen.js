@@ -72,9 +72,11 @@ const HomeScreen = ({ navigation }) => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [featuredSites, setFeaturedSites]   = useState([]);
   const [loading, setLoading]               = useState(true);
+  const [festivals, setFestivals] = useState([]);
 
   useEffect(() => {
     loadFeaturedSites();
+    loadFestivals();
   }, []);
 
   const loadFeaturedSites = async () => {
@@ -89,6 +91,16 @@ const HomeScreen = ({ navigation }) => {
       setLoading(false);
     }
   };
+
+  const loadFestivals = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/festivals`);
+    const data = await response.json();
+    setFestivals(data);
+  } catch (err) {
+    console.error('Error loading festivals:', err);
+  }
+ };
 
   return (
     <View style={styles.container}>
@@ -249,48 +261,57 @@ const HomeScreen = ({ navigation }) => {
         </View>
 
         {/* ── Upcoming Events ── */}
-        <View style={styles.sectionContainer}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>
-              Upcoming Events
+<View style={styles.sectionContainer}>
+  <View style={styles.sectionHeader}>
+    <Text style={styles.sectionTitle}>
+      Upcoming Events
+    </Text>
+  </View>
+
+  {festivals.length === 0 ? (
+    <ActivityIndicator size="small" color="#006B3F" />
+  ) : (
+    festivals.map((festival) => (
+      <TouchableOpacity
+        key={festival.festivalId}
+        style={styles.eventCard}
+        onPress={() => navigation.navigate('FestivalDetail',
+          { festival: {
+            ...festival,
+            fullDate: festival.startDate,
+            highlights: festival.highlights
+              ? festival.highlights.split('|')
+              : [],
+          }})}
+      >
+        <View style={[styles.eventDate,
+          { backgroundColor: festival.color || '#006B3F' }]}>
+          <Text style={styles.eventDay}>{festival.day}</Text>
+          <Text style={styles.eventMonth}>{festival.month}</Text>
+        </View>
+        <View style={styles.eventInfo}>
+          <Text style={styles.eventName}>{festival.name}</Text>
+          <View style={styles.eventLocationRow}>
+            <Ionicons
+              name="location-sharp"
+              size={12}
+              color="#888888"
+            />
+            <Text style={styles.eventLocation}>
+              {festival.location}
             </Text>
           </View>
-           {FESTIVALS.map((festival) => (
-            <TouchableOpacity
-              key={festival.id}
-              style={styles.eventCard}
-              onPress={() => navigation.navigate('FestivalDetail',
-                { festival })}
-            >
-
-             <View style={[styles.eventDate, 
-              { backgroundColor: festival.color}]}>
-              <Text style={styles.eventDay}>{festival.day}</Text>
-              <Text style={styles.eventMonth}>{festival.month}</Text>
-             </View>   
-             <View style={styles.eventInfo}>
-              <Text style={styles.eventName}>{festival.name}</Text>
-              <View style={styles.eventLocationRow}>
-                <Ionicons
-                  name="location-sharp"
-                  size={12}
-                  color="#888888"
-                />
-                <Text style={styles.eventLocation}>
-                  {festival.location}
-                </Text>
-              </View>
-              <View style={styles.eventBadge}>
-                <Text style={styles.eventBadgeText}>
-                  {festival.category}
-                </Text>
-              </View>
-            </View>
-            <Ionicons name="chevron-forward" size={22} color="#CCCCCC" />
-          </TouchableOpacity>
-       ))}
-       
+          <View style={styles.eventBadge}>
+            <Text style={styles.eventBadgeText}>
+              {festival.category}
+            </Text>
+          </View>
         </View>
+        <Ionicons name="chevron-forward" size={22} color="#CCCCCC" />
+      </TouchableOpacity>
+      ))
+     )}
+    </View>
 
         <View style={{ height: 100 }} />
 
