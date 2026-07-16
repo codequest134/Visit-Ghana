@@ -272,46 +272,52 @@ const HomeScreen = ({ navigation }) => {
     <ActivityIndicator size="small" color="#006B3F" />
   ) : (
     festivals.map((festival) => (
-      <TouchableOpacity
-        key={festival.festivalId}
-        style={styles.eventCard}
-        onPress={() => navigation.navigate('FestivalDetail',
-          { festival: {
-            ...festival,
-            fullDate: festival.startDate,
-            highlights: festival.highlights
-              ? festival.highlights.split('|')
-              : [],
-          }})}
-      >
-        <View style={[styles.eventDate,
-          { backgroundColor: festival.color || '#006B3F' }]}>
-          <Text style={styles.eventDay}>{festival.day}</Text>
-          <Text style={styles.eventMonth}>{festival.month}</Text>
-        </View>
-        <View style={styles.eventInfo}>
-          <Text style={styles.eventName}>{festival.name}</Text>
-          <View style={styles.eventLocationRow}>
-            <Ionicons
-              name="location-sharp"
-              size={12}
-              color="#888888"
-            />
-            <Text style={styles.eventLocation}>
-              {festival.location}
-            </Text>
-          </View>
-          <View style={styles.eventBadge}>
-            <Text style={styles.eventBadgeText}>
-              {festival.category}
-            </Text>
-          </View>
-        </View>
-        <Ionicons name="chevron-forward" size={22} color="#CCCCCC" />
-      </TouchableOpacity>
-      ))
-     )}
+  <TouchableOpacity
+    key={festival.festivalId}
+    style={styles.eventCard}
+    onPress={() => navigation.navigate('FestivalDetail',
+      { festival: {
+        ...festival,
+        fullDate: festival.startDate,
+        highlights: festival.highlights
+          ? festival.highlights.split('|')
+          : [],
+      }})}
+  >
+    <ImageBackground
+      source={{ uri: festival.imageUrl }}
+      style={[styles.eventDate,
+        { backgroundColor: festival.color || '#006B3F' }]}
+      imageStyle={styles.eventDateImage}
+    >
+      <View style={styles.eventDateOverlay}>
+        <Text style={styles.eventDay}>{festival.day}</Text>
+        <Text style={styles.eventMonth}>{festival.month}</Text>
+      </View>
+    </ImageBackground>
+    <View style={styles.eventInfo}>
+      <Text style={styles.eventName}>{festival.name}</Text>
+      <View style={styles.eventLocationRow}>
+        <Ionicons
+          name="location-sharp"
+          size={12}
+          color="#888888"
+        />
+        <Text style={styles.eventLocation}>
+          {festival.location}
+        </Text>
+      </View>
+      <View style={styles.eventBadge}>
+        <Text style={styles.eventBadgeText}>
+          {festival.category}
+        </Text>
+      </View>
     </View>
+    <Ionicons name="chevron-forward" size={22} color="#CCCCCC" />
+  </TouchableOpacity>
+))
+  )}
+</View>
 
         <View style={{ height: 100 }} />
 
@@ -554,10 +560,18 @@ siteCardOverlay: {
     borderRadius: 10,
     width: 48,
     height: 52,
-    justifyContent: 'center',
-    alignItems: 'center',
+    overflow: 'hidden',
     marginRight: 14,
   },
+  eventDateImage: {
+  resizeMode: 'cover',
+},
+eventDateOverlay: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: 'rgba(0,0,0,0.4)',
+},
   eventDay: {
     fontSize: 18,
     fontWeight: 'bold',
