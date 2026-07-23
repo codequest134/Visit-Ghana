@@ -8,15 +8,30 @@ import {
   ActivityIndicator,
 } from 'react-native';
 
+import { restoreSession } from '../../utils/auth';
+
 const SplashScreen = ({ navigation }) => {
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      navigation.replace('Welcome');
-    }, 3000);
+    let isActive = true;
 
-    return () => clearTimeout(timer);
-  }, []);
+    const bootstrap = async () => {
+      const user = await restoreSession();
+
+      if (!isActive) {
+        return;
+      }
+
+      navigation.replace(user ? 'Home' : 'Welcome');
+    };
+
+    const timer = setTimeout(bootstrap, 2000);
+
+    return () => {
+      isActive = false;
+      clearTimeout(timer);
+    };
+  }, [navigation]);
 
   return (
     <View style={styles.container}>

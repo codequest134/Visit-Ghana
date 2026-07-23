@@ -9,7 +9,8 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { getCurrentUser, clearCurrentUser } from '../../utils/currentUser';
+import { getCurrentUser } from '../../utils/currentUser';
+import { signOut } from '../../utils/auth';
 import BottomNav from '../../components/BottomNav';
 
 const ProfileScreen = ({ navigation }) => {
@@ -33,8 +34,8 @@ const ProfileScreen = ({ navigation }) => {
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => {
-            clearCurrentUser();
+          onPress: async () => {
+            await signOut();
             navigation.replace('Welcome');
           },
         },

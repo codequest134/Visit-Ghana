@@ -12,8 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import BASE_URL from '../../utils/api';
-import { setCurrentUser } from '../../utils/currentUser';
+import { signIn } from '../../utils/auth';
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail]             = useState('');
@@ -37,26 +36,10 @@ const LoginScreen = ({ navigation }) => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: email,
-          password: password,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCurrentUser(data);
-        navigation.replace('Home');
-      } else {
-        setError('Invalid email or password');
-      }
+      await signIn({ email, password });
+      navigation.replace('Home');
     } catch (err) {
-      setError('Connection error. Check your network and try again.');
+      setError(err.message || 'Connection error. Check your network and try again.');
     } finally {
       setLoading(false);
     }

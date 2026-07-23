@@ -12,8 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import BASE_URL from '../../utils/api';
-import { setCurrentUser } from '../../utils/currentUser';
+import { signUp } from '../../utils/auth';
 
 
 const SignUpScreen = ({ navigation }) => {
@@ -53,30 +52,14 @@ const SignUpScreen = ({ navigation }) => {
     setLoading(true);
 
     try {
-      console.log('Calling:', `${BASE_URL}/auth/signup`);
-      const response = await fetch(`${BASE_URL}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fullName: fullName,
-          email: email,
-          password: password,
-        }),
+      await signUp({
+        fullName,
+        email,
+        password,
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCurrentUser(data);
-        navigation.replace('Home');
-      } else if (response.status === 409) {
-        setError('This email is already registered');
-      } else {
-        setError('Could not create account. Please try again.');
-      }
+      navigation.replace('Home');
     } catch (err) {
-      setError('Connection error. Check your network and try again.');
+      setError(err.message || 'Connection error. Check your network and try again.');
     } finally {
       setLoading(false);
     }

@@ -12,67 +12,28 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BottomNav from '../../components/BottomNav';
-
-// ⬇️ Your backend address
-const BASE_URL = 'https://visitghana-api.onrender.com/api';
-
-const CATEGORIES = [
-  { id: '1', name: 'All' },
-  { id: '2', name: 'Historical' },
-  { id: '3', name: 'Wildlife' },
-  { id: '4', name: 'Beach' },
-  { id: '5', name: 'Cultural' },
-  { id: '6', name: 'Religious' },
-];
-
-const FESTIVALS = [
-  {
-    id: '1',
-    name: 'Homowo Festival',
-    day: '24',
-    month: 'AUG',
-    fullDate: '24 August 2025',
-    location: 'Greater Accra Region',
-    duration: '1 Day',
-    category: 'Cultural',
-    color: '#006B3F',
-    description:
-      'Homowo is a harvest festival celebrated by the Ga people of Greater Accra. The name means "hooting at hunger" and commemorates a time when the Ga people overcame a great famine. It is one of the most vibrant and meaningful celebrations in Ghana, marked by the sprinkling of kpokpoi (a traditional festival food) and joyful processions through the streets.',
-    highlights: [
-      'Traditional kpokpoi food sharing',
-      'Colorful street processions and drumming',
-      'Twin celebrations and family reunions',
-      'Traditional Ga durbar of chiefs',
-    ],
-    tip: 'Arrive early in the morning to witness the traditional rituals. Dress respectfully and ask permission before taking photos of the chiefs.',
-  },
-  {
-    id: '2',
-    name: 'Chale Wote Festival',
-    day: '12',
-    month: 'SEP',
-    fullDate: '12 September 2025',
-    location: 'Accra, James Town',
-    duration: '1 Week',
-    category: 'Arts',
-    color: '#1A4A6B',
-    description:
-      'Chale Wote Street Art Festival is an annual alternative arts festival that takes place in the historic James Town district of Accra. It brings together painting, graffiti, photography, music, dance, street performances, and fashion. The festival transforms the streets into an open-air gallery and is a celebration of African creativity and urban culture.',
-    highlights: [
-      'Live street art and graffiti murals',
-      'Music performances and DJ sets',
-      'Fashion shows and art installations',
-      'Food vendors and local craft markets',
-    ],
-    tip: 'Wear comfortable shoes as you will be walking a lot. Bring cash for the food stalls and local art you may want to buy.',
-  },
-];
+import BASE_URL from '../../utils/api';
 
 const HomeScreen = ({ navigation }) => {
   const [activeCategory, setActiveCategory] = useState('All');
-  const [featuredSites, setFeaturedSites]   = useState([]);
-  const [loading, setLoading]               = useState(true);
+  const [categories, setCategories] = useState([{ id: 'all', name: 'All' }]);
+  const [featuredSites, setFeaturedSites] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [festivals, setFestivals] = useState([]);
+
+  const buildCategories = (sites = []) => {
+    const uniqueCategories = Array.from(
+      new Set(sites.map((site) => site.category).filter(Boolean))
+    );
+
+    return [
+      { id: 'all', name: 'All' },
+      ...uniqueCategories.map((name, index) => ({
+        id: `${index + 1}`,
+        name,
+      })),
+    ];
+  };
 
   useEffect(() => {
     loadFeaturedSites();
@@ -84,7 +45,10 @@ const HomeScreen = ({ navigation }) => {
       setLoading(true);
       const response = await fetch(`${BASE_URL}/sites`);
       const data = await response.json();
-      setFeaturedSites(data.slice(0, 5));
+      const sites = Array.isArray(data) ? data : [];
+      setFeaturedSites(sites.slice(0, 5));
+      setCategories(buildCategories(sites));
+      setActiveCategory('All');
     } catch (err) {
       console.error('Error loading sites:', err);
     } finally {
@@ -93,14 +57,14 @@ const HomeScreen = ({ navigation }) => {
   };
 
   const loadFestivals = async () => {
-  try {
-    const response = await fetch(`${BASE_URL}/festivals`);
-    const data = await response.json();
-    setFestivals(data);
-  } catch (err) {
-    console.error('Error loading festivals:', err);
-  }
- };
+    try {
+      const response = await fetch(`${BASE_URL}/festivals`);
+      const data = await response.json();
+      setFestivals(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error('Error loading festivals:', err);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -146,7 +110,7 @@ const HomeScreen = ({ navigation }) => {
         {/* ── Categories ── */}
         <View style={styles.sectionContainer}>
           <FlatList
-            data={CATEGORIES}
+            data={categories}
             horizontal
             showsHorizontalScrollIndicator={false}
             keyExtractor={(item) => item.id}
@@ -246,16 +210,22 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>
-              {featuredSites.length > 0 ? '11+' : '...'}
+              {featuredSites.length > 0 ? `${featuredSites.length}+` : '...'}
             </Text>
             <Text style={styles.statLabel}>Tourist Sites</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>1K+</Text>
-            <Text style={styles.statLabel}>Community Photos</Text>
+            <Text style={styles.statNumber}>
+              {festivals.length > 0 ? `${festivals.length}+` : '...'}
+            </Text>
+            <Text style={styles.statLabel}>Upcoming Events</Text>
           </View>
           <View style={styles.statCard}>
-            <Text style={styles.statNumber}>16</Text>
+            <Text style={styles.statNumber}>
+              {featuredSites.length > 0
+                ? `${new Set(featuredSites.map((site) => site.region).filter(Boolean)).size}`
+                : '...'}
+            </Text>
             <Text style={styles.statLabel}>Regions</Text>
           </View>
         </View>

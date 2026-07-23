@@ -12,7 +12,8 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import BASE_URL from '../../utils/api';
-import { getCurrentUser, setCurrentUser } from '../../utils/currentUser';
+import { getCurrentUser } from '../../utils/currentUser';
+import { saveSession } from '../../utils/auth';
 
 
 const EditProfileScreen = ({ navigation }) => {
@@ -59,7 +60,7 @@ const EditProfileScreen = ({ navigation }) => {
       if (response.ok) {
         const data = await response.json();
         // Update the stored user so Profile shows new info
-        setCurrentUser(data);
+        await saveSession(data);
         Alert.alert(
           'Profile Updated',
           'Your profile has been updated successfully.',
