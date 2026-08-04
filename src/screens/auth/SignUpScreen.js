@@ -12,27 +12,26 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { signUp } from '../../utils/auth';
-
+import BASE_URL from '../../utils/api';
+import { setCurrentUser } from '../../utils/currentUser';
 
 const SignUpScreen = ({ navigation }) => {
-  const [fullName, setFullName]               = useState('');
-  const [email, setEmail]                     = useState('');
-  const [password, setPassword]               = useState('');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword]       = useState(false);
-  const [loading, setLoading]                 = useState(false);
-  const [error, setError]                     = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSignUp = async () => {
     setError('');
 
-    // Validation
     if (!fullName || !email || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
     }
-    if (fullName.length < 3) {
+    if (fullName.trim().length < 3) {
       setError('Please enter your full name');
       return;
     }
@@ -52,14 +51,27 @@ const SignUpScreen = ({ navigation }) => {
     setLoading(true);
 
     try {
-      await signUp({
-        fullName,
-        email,
-        password,
+      const response = await fetch(`${BASE_URL}/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          password: password,
+        }),
       });
-      navigation.replace('Home');
+
+      if (response.ok) {
+        const data = await response.json();
+        setCurrentUser(data);
+        navigation.replace('Home');
+      } else if (response.status === 409) {
+        setError('This email is already registered');
+      } else {
+        setError('Could not create account. Please try again.');
+      }
     } catch (err) {
-      setError(err.message || 'Connection error. Check your network and try again.');
+      setError('Connection error. Check your network and try again.');
     } finally {
       setLoading(false);
     }
@@ -200,7 +212,7 @@ const SignUpScreen = ({ navigation }) => {
           {/* Sign Up Button */}
           <TouchableOpacity
             style={[styles.signupButton,
-              loading && styles.buttonDisabled]}
+            loading && styles.buttonDisabled]}
             onPress={handleSignUp}
             disabled={loading}
           >
