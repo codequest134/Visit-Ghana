@@ -18,6 +18,7 @@ const HomeScreen = ({ navigation }) => {
   const [activeCategory, setActiveCategory] = useState('All');
   const [categories, setCategories] = useState([{ id: 'all', name: 'All' }]);
   const [featuredSites, setFeaturedSites] = useState([]);
+  const [totalSites, setTotalSites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [festivals, setFestivals] = useState([]);
 
@@ -47,6 +48,7 @@ const HomeScreen = ({ navigation }) => {
       const data = await response.json();
       const sites = Array.isArray(data) ? data : [];
       setFeaturedSites(sites.slice(0, 5));
+      setTotalSites(sites);
       setCategories(buildCategories(sites));
       setActiveCategory('All');
     } catch (err) {
@@ -210,7 +212,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>
-              {featuredSites.length > 0 ? `${featuredSites.length}+` : '...'}
+              {totalSites.length > 0 ? `${totalSites.length}+` : '...'}
             </Text>
             <Text style={styles.statLabel}>Tourist Sites</Text>
           </View>
@@ -222,8 +224,8 @@ const HomeScreen = ({ navigation }) => {
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statNumber}>
-              {featuredSites.length > 0
-                ? `${new Set(featuredSites.map((site) => site.region).filter(Boolean)).size}`
+              {totalSites.length > 0
+                ? `${new Set(totalSites.map((site) => site.region).filter(Boolean)).size}`
                 : '...'}
             </Text>
             <Text style={styles.statLabel}>Regions</Text>
